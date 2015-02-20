@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Implementation-Title: wildfly-common
+Implementation-Version: 1.0.0.Alpha1
+Build-Timestamp: Fri, 20 Feb 2015 10:32:40 -0600
+Archiver-Version: Plexus Archiver
+Java-Version: 1.8.0_25
+Built-By: david
+Scm-Connection: scm:git:git@github.com:jboss/jboss-parent-pom.git/wild
+ fly-common
+Specification-Vendor: JBoss by Red Hat
+Os-Arch: amd64
+Specification-Title: wildfly-common
+Implementation-Vendor-Id: org.wildfly.common
+Java-Vendor: Oracle Corporation
+Os-Name: Linux
+Scm-Url: http://github.com/jboss/jboss-parent-pom/wildfly-common
+Implementation-Vendor: JBoss by Red Hat
+Os-Version: 3.18.7-100.fc20.x86_64
+Scm-Revision: 3fc1c898a1335f48c0bed71cfd9e30a393d94aa2
+Created-By: Apache Maven
+Build-Jdk: 1.8.0_25
+Specification-Version: 1.0.0.Alpha1
+Implementation-URL: http://www.jboss.org/wildfly-common
+

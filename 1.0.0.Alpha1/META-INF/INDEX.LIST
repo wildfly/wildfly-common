@@ -1,0 +1,27 @@
+JarIndex-Version: 1.0
+
+wildfly-common-1.0.0.Alpha1-javadoc.jar
+org
+org/wildfly
+org/wildfly/common
+org/wildfly/common/class-use
+org/wildfly/common/ref
+org/wildfly/common/ref/class-use
+org/wildfly/common/selector
+org/wildfly/common/selector/class-use
+allclasses-frame.html
+allclasses-noframe.html
+constant-values.html
+deprecated-list.html
+help-doc.html
+index-all.html
+index.html
+overview-frame.html
+overview-summary.html
+overview-summary.png
+overview-tree.html
+package-list
+script.js
+serialized-form.html
+stylesheet.css
+
