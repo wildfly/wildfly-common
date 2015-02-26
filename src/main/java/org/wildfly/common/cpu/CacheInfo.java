@@ -22,6 +22,8 @@ import static java.security.AccessController.doPrivileged;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
@@ -131,13 +133,32 @@ public final class CacheInfo {
                                 return levelInfoArray;
                             }
                         }
-                    } else if (osArch.contains("macosx")) {
-                        // TODO: use the following sysctls:
-                        //  sysctl hw.cachelinesize
-                        //  sysctl hw.l1dcachesize
-                        //  sysctl hw.l1icachesize
-                        //  sysctl hw.l2cachesize
-                        //  sysctl hw.l3cachesize
+                    } else if (osArch.contains("mac os x")) {
+                        // cache line size
+                        final int lineSize = safeParseInt(parseProcessOutput("/usr/sbin/sysctl", "-n", "hw.cachelinesize"));
+                        if (lineSize != 0) {
+                            // cache sizes
+                            final int l1d = safeParseInt(parseProcessOutput("/usr/sbin/sysctl", "-n", "hw.l1dcachesize"));
+                            final int l1i = safeParseInt(parseProcessOutput("/usr/sbin/sysctl", "-n", "hw.l1icachesize"));
+                            final int l2  = safeParseInt(parseProcessOutput("/usr/sbin/sysctl", "-n", "hw.l2cachesize"));
+                            final int l3  = safeParseInt(parseProcessOutput("/usr/sbin/sysctl", "-n", "hw.l3cachesize"));
+                            ArrayList<CacheLevelInfo> list = new ArrayList<CacheLevelInfo>();
+                            if (l1d != 0) {
+                                list.add(new CacheLevelInfo(1, CacheType.DATA, l1d / 1024, lineSize));
+                            }
+                            if (l1i != 0) {
+                                list.add(new CacheLevelInfo(1, CacheType.INSTRUCTION, l1i / 1024, lineSize));
+                            }
+                            if (l2 != 0) {
+                                list.add(new CacheLevelInfo(2, CacheType.UNIFIED, l2 / 1024, lineSize));
+                            }
+                            if (l3 != 0) {
+                                list.add(new CacheLevelInfo(3, CacheType.UNIFIED, l3 / 1024, lineSize));
+                            }
+                            if (list.size() > 0) {
+                                return list.toArray(new CacheLevelInfo[list.size()]);
+                            }
+                        }
                     } else if (osArch.contains("windows")) {
                         // TODO: use the wmic utility to get cache line info
                     }
@@ -149,8 +170,12 @@ public final class CacheInfo {
     }
 
     static int parseIntFile(final File file) {
+        return safeParseInt(parseStringFile(file));
+    }
+
+    static int safeParseInt(final String string) {
         try {
-            return Integer.parseInt(parseStringFile(file));
+            return Integer.parseInt(string);
         } catch (Throwable ignored) {
             return 0;
         }
@@ -175,17 +200,83 @@ public final class CacheInfo {
 
     static String parseStringFile(final File file) {
         try (FileInputStream is = new FileInputStream(file)) {
-            try (Reader r = new InputStreamReader(is, StandardCharsets.UTF_8)) {
-                StringBuilder b = new StringBuilder();
-                char[] cb = new char[64];
-                int res;
-                while ((res = r.read(cb)) != -1) {
-                    b.append(cb, 0, res);
-                }
-                return b.toString().trim();
-            }
+            return parseStringStream(is);
         } catch (Throwable ignored) {
             return "";
+        }
+    }
+
+    static String parseStringStream(final InputStream is) {
+        try (Reader r = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+            StringBuilder b = new StringBuilder();
+            char[] cb = new char[64];
+            int res;
+            while ((res = r.read(cb)) != -1) {
+                b.append(cb, 0, res);
+            }
+            return b.toString().trim();
+        } catch (Throwable ignored) {
+            return "";
+        }
+    }
+
+    static String parseProcessOutput(final String... args) {
+        final ProcessBuilder processBuilder = new ProcessBuilder(args);
+        try {
+            final Process process = processBuilder.start();
+            process.getOutputStream().close();
+            final InputStream errorStream = process.getErrorStream();
+
+            final Thread errorThread = new Thread(null, new StreamConsumer(errorStream), "Process thread", 32768L);
+            errorThread.start();
+
+            final String result;
+            try (final InputStream inputStream = process.getInputStream()) {
+                result = parseStringStream(inputStream);
+            }
+
+            boolean intr = false;
+            try {
+                process.waitFor();
+            } catch (InterruptedException e) {
+                intr = true;
+                return null;
+            } finally {
+                try {
+                    errorThread.join();
+                } catch (InterruptedException e) {
+                    intr = true;
+                } finally {
+                    if (intr) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+            }
+            return result;
+        } catch (IOException e) {
+            return "";
+        }
+    }
+
+    static class StreamConsumer implements Runnable {
+
+        private final InputStream stream;
+
+        StreamConsumer(final InputStream stream) {
+            this.stream = stream;
+        }
+
+        public void run() {
+            byte[] buffer = new byte[128];
+            try {
+                while (stream.read(buffer) != -1) ;
+            } catch (IOException ignored) {
+            } finally {
+                try {
+                    stream.close();
+                } catch (IOException ignored) {
+                }
+            }
         }
     }
 
