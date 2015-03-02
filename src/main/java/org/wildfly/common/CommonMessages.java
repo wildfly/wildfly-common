@@ -65,6 +65,6 @@ interface CommonMessages {
     @Message(id = 2001, value = "Internal error: Impossible switch condition encountered: %s")
     IllegalStateException impossibleSwitchCase(Object cond);
 
-    // 3000-3099 reserved for reference queue logging
+    // 3000-3099 reserved for reference queue logging (see {@link org.wildfly.common.ref.Log})
 
 }
