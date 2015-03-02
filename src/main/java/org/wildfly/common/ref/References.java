@@ -76,6 +76,9 @@ public final class References {
         public void run() {
             for (;;) try {
                 final java.lang.ref.Reference<?> ref = REAPER_QUEUE.remove();
+                if (ref instanceof CleanerReference) {
+                    ((CleanerReference<?, ?>) ref).clean();
+                }
                 if (ref instanceof Reapable) {
                     reap((Reapable<?, ?>) ref);
                 }
