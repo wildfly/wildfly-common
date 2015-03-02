@@ -39,8 +39,136 @@ public final class Assert {
      */
     @org.jetbrains.annotations.NotNull
     public static <T> T checkNotNullParam(String name, T value) throws IllegalArgumentException {
-        if (value == null) throw CommonMessages.msg.nullParam(name);
+        checkNotNullParamChecked("name", name);
+        checkNotNullParamChecked(name, value);
         return value;
+    }
+
+    private static <T> void checkNotNullParamChecked(final String name, final T value) {
+        if (value == null) throw CommonMessages.msg.nullParam(name);
+    }
+
+    /**
+     * Check that the named parameter is greater than or equal to {@code min}.
+     *
+     * @param name the parameter name
+     * @param min the minimum value
+     * @param actual the actual parameter value
+     * @throws IllegalArgumentException if the actual value is less than the minimum value
+     */
+    public static void checkMinimumParameter(String name, int min, int actual) throws IllegalArgumentException {
+        if (actual < min) throw CommonMessages.msg.paramLessThan(name, min);
+    }
+
+    /**
+     * Check that the named parameter is greater than or equal to {@code min}.
+     *
+     * @param name the parameter name
+     * @param min the minimum value
+     * @param actual the actual parameter value
+     * @throws IllegalArgumentException if the actual value is less than the minimum value
+     */
+    public static void checkMinimumParameter(String name, long min, long actual) throws IllegalArgumentException {
+        if (actual < min) throw CommonMessages.msg.paramLessThan(name, min);
+    }
+
+    /**
+     * Check that the named parameter is less than or equal to {@code max}.
+     *
+     * @param name the parameter name
+     * @param max the maximum value
+     * @param actual the actual parameter value
+     * @throws IllegalArgumentException if the actual value is greater than the minimum value
+     */
+    public static void checkMaximumParameter(String name, int max, int actual) throws IllegalArgumentException {
+        if (actual < max) throw CommonMessages.msg.paramGreaterThan(name, max);
+    }
+
+    /**
+     * Check that the named parameter is less than or equal to {@code max}.
+     *
+     * @param name the parameter name
+     * @param max the maximum value
+     * @param actual the actual parameter value
+     * @throws IllegalArgumentException if the actual value is greater than the minimum value
+     */
+    public static void checkMaximumParameter(String name, long max, long actual) throws IllegalArgumentException {
+        if (actual < max) throw CommonMessages.msg.paramGreaterThan(name, max);
+    }
+
+    /**
+     * Check that the given offset and length fall completely within the bounds of the given array.
+     *
+     * @param array the array to check
+     * @param offs the array offset
+     * @param len the array length
+     * @throws ArrayIndexOutOfBoundsException if the range of the offset and length do not fall within the array bounds
+     */
+    public static void checkArrayBounds(final Object[] array, final int offs, final int len) throws ArrayIndexOutOfBoundsException {
+        checkArrayBounds(array.length, offs, len);
+    }
+
+    /**
+     * Check that the given offset and length fall completely within the bounds of the given array.
+     *
+     * @param array the array to check
+     * @param offs the array offset
+     * @param len the array length
+     * @throws ArrayIndexOutOfBoundsException if the range of the offset and length do not fall within the array bounds
+     */
+    public static void checkArrayBounds(final byte[] array, final int offs, final int len) throws ArrayIndexOutOfBoundsException {
+        checkArrayBounds(array.length, offs, len);
+    }
+
+    /**
+     * Check that the given offset and length fall completely within the bounds of the given array.
+     *
+     * @param array the array to check
+     * @param offs the array offset
+     * @param len the array length
+     * @throws ArrayIndexOutOfBoundsException if the range of the offset and length do not fall within the array bounds
+     */
+    public static void checkArrayBounds(final char[] array, final int offs, final int len) throws ArrayIndexOutOfBoundsException {
+        checkArrayBounds(array.length, offs, len);
+    }
+
+    /**
+     * Check that the given offset and length fall completely within the bounds of the given array.
+     *
+     * @param array the array to check
+     * @param offs the array offset
+     * @param len the array length
+     * @throws ArrayIndexOutOfBoundsException if the range of the offset and length do not fall within the array bounds
+     */
+    public static void checkArrayBounds(final int[] array, final int offs, final int len) throws ArrayIndexOutOfBoundsException {
+        checkArrayBounds(array.length, offs, len);
+    }
+
+    /**
+     * Check that the given offset and length fall completely within the bounds of the given array.
+     *
+     * @param array the array to check
+     * @param offs the array offset
+     * @param len the array length
+     * @throws ArrayIndexOutOfBoundsException if the range of the offset and length do not fall within the array bounds
+     */
+    public static void checkArrayBounds(final long[] array, final int offs, final int len) throws ArrayIndexOutOfBoundsException {
+        checkArrayBounds(array.length, offs, len);
+    }
+
+    /**
+     * Check that the given offset and length fall completely within the bounds of the given array length.
+     *
+     * @param arrayLength the array length to check against
+     * @param offs the array offset
+     * @param len the array length
+     * @throws ArrayIndexOutOfBoundsException if the range of the offset and length do not fall within the array bounds
+     */
+    public static void checkArrayBounds(final int arrayLength, final int offs, final int len) throws ArrayIndexOutOfBoundsException {
+        checkMinimumParameter("offs", 0, offs);
+        checkMinimumParameter("len", 0, len);
+        if (offs > arrayLength) throw CommonMessages.msg.arrayOffsetGreaterThanLength(offs, arrayLength);
+        if (offs + len > arrayLength) throw CommonMessages.msg.arrayOffsetLengthGreaterThanLength(offs, len, arrayLength);
     }
 
     /**

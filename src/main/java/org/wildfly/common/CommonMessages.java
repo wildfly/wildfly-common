@@ -34,6 +34,18 @@ interface CommonMessages {
     @Message(id = 0, value = "Parameter '%s' may not be null")
     IllegalArgumentException nullParam(String paramName);
 
+    @Message(id = 1, value = "Parameter '%s' must not be less than %d")
+    IllegalArgumentException paramLessThan(String name, long min);
+
+    @Message(id = 2, value = "Parameter '%s' must not be greater than than %d")
+    IllegalArgumentException paramGreaterThan(String name, long max);
+
+    @Message(id = 3, value = "Given offset of %d is greater than array length of %d")
+    ArrayIndexOutOfBoundsException arrayOffsetGreaterThanLength(int offs, int arrayLength);
+
+    @Message(id = 4, value = "Given offset of %d plus length of %d is greater than array length of %d")
+    ArrayIndexOutOfBoundsException arrayOffsetLengthGreaterThanLength(int offs, int len, int arrayLength);
+
     // assertion errors
 
     @Message(id = 1000, value = "Internal error: Assertion failure: Unexpectedly null value")
