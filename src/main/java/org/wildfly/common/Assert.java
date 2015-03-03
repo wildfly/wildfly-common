@@ -238,7 +238,7 @@ public final class Assert {
      */
     @org.jetbrains.annotations.NotNull
     public static <T> T assertNotHoldsLock(@org.jetbrains.annotations.NotNull T monitor) {
-        assert ! Thread.holdsLock(monitor) : CommonMessages.msg.expectedLockNotHold(monitor);
+        assert ! Thread.holdsLock(checkNotNullParam("monitor", monitor)) : CommonMessages.msg.expectedLockNotHold(monitor);
         return monitor;
     }
 
@@ -259,6 +259,7 @@ public final class Assert {
      */
     @org.jetbrains.annotations.NotNull
     public static IllegalStateException impossibleSwitchCase(@org.jetbrains.annotations.NotNull Object obj) {
+        Assert.checkNotNullParamChecked("obj", obj);
         return CommonMessages.msg.impossibleSwitchCase(obj);
     }
 
