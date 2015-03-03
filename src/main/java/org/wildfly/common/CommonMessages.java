@@ -46,8 +46,13 @@ interface CommonMessages {
     @Message(id = 4, value = "Given offset of %d plus length of %d is greater than array length of %d")
     ArrayIndexOutOfBoundsException arrayOffsetLengthGreaterThanLength(int offs, int len, int arrayLength);
 
-    @Message(id = 0, value = "Array index %d of parameter '%s' may not be null")
+    @Message(id = 5, value = "Array index %d of parameter '%s' may not be null")
     IllegalArgumentException nullArrayParam(int index, String name);
+
+    // execution path validation
+
+    @Message(id = 100, value = "Method \"%s\" of class \"%s\" is not implemented")
+    UnsupportedOperationException unsupported(String methodName, String className);
 
     // assertion errors
 

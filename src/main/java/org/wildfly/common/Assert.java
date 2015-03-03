@@ -283,4 +283,15 @@ public final class Assert {
     public static IllegalStateException impossibleSwitchCase(long val) {
         return CommonMessages.msg.impossibleSwitchCase(Long.valueOf(val));
     }
+
+    /**
+     * Return an exception explaining that the caller's method is not supported.
+     *
+     * @return the exception
+     */
+    @org.jetbrains.annotations.NotNull
+    public static UnsupportedOperationException unsupported() {
+        final StackTraceElement element = new Throwable().getStackTrace()[1];
+        return CommonMessages.msg.unsupported(element.getMethodName(), element.getClassName());
+    }
 }
