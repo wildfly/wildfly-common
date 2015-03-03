@@ -49,6 +49,24 @@ public final class Assert {
     }
 
     /**
+     * Check that a value within the named array parameter is not {@code null}.  Use a standard exception message if it
+     * is.
+     *
+     * @param name the parameter name
+     * @param index the array index
+     * @param value the array element value
+     * @param <T> the element value type
+     * @return the array element value that was passed in
+     * @throws IllegalArgumentException if the value is {@code null}
+     */
+    @org.jetbrains.annotations.NotNull
+    public static <T> T checkNotNullArrayParam(String name, int index, T value) throws IllegalArgumentException {
+        checkNotNullParamChecked("name", name);
+        if (value == null) throw CommonMessages.msg.nullArrayParam(index, name);
+        return value;
+    }
+
+    /**
      * Check that the named parameter is greater than or equal to {@code min}.
      *
      * @param name the parameter name
@@ -57,6 +75,7 @@ public final class Assert {
      * @throws IllegalArgumentException if the actual value is less than the minimum value
      */
     public static void checkMinimumParameter(String name, int min, int actual) throws IllegalArgumentException {
+        checkNotNullParamChecked("name", name);
         if (actual < min) throw CommonMessages.msg.paramLessThan(name, min);
     }
 
@@ -69,6 +88,7 @@ public final class Assert {
      * @throws IllegalArgumentException if the actual value is less than the minimum value
      */
     public static void checkMinimumParameter(String name, long min, long actual) throws IllegalArgumentException {
+        checkNotNullParamChecked("name", name);
         if (actual < min) throw CommonMessages.msg.paramLessThan(name, min);
     }
 
@@ -81,6 +101,7 @@ public final class Assert {
      * @throws IllegalArgumentException if the actual value is greater than the minimum value
      */
     public static void checkMaximumParameter(String name, int max, int actual) throws IllegalArgumentException {
+        checkNotNullParamChecked("name", name);
         if (actual < max) throw CommonMessages.msg.paramGreaterThan(name, max);
     }
 
@@ -93,6 +114,7 @@ public final class Assert {
      * @throws IllegalArgumentException if the actual value is greater than the minimum value
      */
     public static void checkMaximumParameter(String name, long max, long actual) throws IllegalArgumentException {
+        checkNotNullParamChecked("name", name);
         if (actual < max) throw CommonMessages.msg.paramGreaterThan(name, max);
     }
 
@@ -105,6 +127,7 @@ public final class Assert {
      * @throws ArrayIndexOutOfBoundsException if the range of the offset and length do not fall within the array bounds
      */
     public static void checkArrayBounds(final Object[] array, final int offs, final int len) throws ArrayIndexOutOfBoundsException {
+        checkNotNullParamChecked("array", array);
         checkArrayBounds(array.length, offs, len);
     }
 
@@ -117,6 +140,7 @@ public final class Assert {
      * @throws ArrayIndexOutOfBoundsException if the range of the offset and length do not fall within the array bounds
      */
     public static void checkArrayBounds(final byte[] array, final int offs, final int len) throws ArrayIndexOutOfBoundsException {
+        checkNotNullParamChecked("array", array);
         checkArrayBounds(array.length, offs, len);
     }
 
@@ -129,6 +153,7 @@ public final class Assert {
      * @throws ArrayIndexOutOfBoundsException if the range of the offset and length do not fall within the array bounds
      */
     public static void checkArrayBounds(final char[] array, final int offs, final int len) throws ArrayIndexOutOfBoundsException {
+        checkNotNullParamChecked("array", array);
         checkArrayBounds(array.length, offs, len);
     }
 
@@ -141,6 +166,7 @@ public final class Assert {
      * @throws ArrayIndexOutOfBoundsException if the range of the offset and length do not fall within the array bounds
      */
     public static void checkArrayBounds(final int[] array, final int offs, final int len) throws ArrayIndexOutOfBoundsException {
+        checkNotNullParamChecked("array", array);
         checkArrayBounds(array.length, offs, len);
     }
 
@@ -153,6 +179,7 @@ public final class Assert {
      * @throws ArrayIndexOutOfBoundsException if the range of the offset and length do not fall within the array bounds
      */
     public static void checkArrayBounds(final long[] array, final int offs, final int len) throws ArrayIndexOutOfBoundsException {
+        checkNotNullParamChecked("array", array);
         checkArrayBounds(array.length, offs, len);
     }
 

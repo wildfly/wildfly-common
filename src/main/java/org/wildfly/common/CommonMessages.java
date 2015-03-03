@@ -46,6 +46,9 @@ interface CommonMessages {
     @Message(id = 4, value = "Given offset of %d plus length of %d is greater than array length of %d")
     ArrayIndexOutOfBoundsException arrayOffsetLengthGreaterThanLength(int offs, int len, int arrayLength);
 
+    @Message(id = 0, value = "Array index %d of parameter '%s' may not be null")
+    IllegalArgumentException nullArrayParam(int index, String name);
+
     // assertion errors
 
     @Message(id = 1000, value = "Internal error: Assertion failure: Unexpectedly null value")
