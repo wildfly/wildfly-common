@@ -243,6 +243,30 @@ public final class Assert {
     }
 
     /**
+     * Assert that the given expression is always {@code true}.
+     *
+     * @param expr the boolean expression
+     * @return the boolean expression
+     */
+    @SuppressWarnings("ConstantConditions")
+    public static boolean assertTrue(boolean expr) {
+        assert expr : CommonMessages.msg.expectedBoolean(expr);
+        return expr;
+    }
+
+    /**
+     * Assert that the given expression is always {@code false}.
+     *
+     * @param expr the boolean expression
+     * @return the boolean expression
+     */
+    @SuppressWarnings("ConstantConditions")
+    public static boolean assertFalse(boolean expr) {
+        assert ! expr : CommonMessages.msg.expectedBoolean(expr);
+        return expr;
+    }
+
+    /**
      * Return an exception indicating that the current code was intended to be unreachable.
      *
      * @return the exception which may be immediately thrown

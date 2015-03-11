@@ -65,6 +65,9 @@ interface CommonMessages {
     @Message(id = 1002, value = "Internal error: Assertion failure: Current thread expected to not hold lock for %s")
     String expectedLockNotHold(Object monitor);
 
+    @Message(id = 1003, value = "Internal error: Assertion failure: Expected boolean value to be %s")
+    String expectedBoolean(boolean expr);
+
     // internal state errors
 
     @Message(id = 2000, value = "Internal error: Unreachable code has been reached")
