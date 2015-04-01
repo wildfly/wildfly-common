@@ -18,6 +18,7 @@
 
 package org.wildfly.common.selector;
 
+import java.lang.reflect.InvocationTargetException;
 import java.security.PrivilegedAction;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -38,9 +39,27 @@ public abstract class Selector<T> {
 
     private static final ClassValue<Holder<?>> selVal = new ClassValue<Holder<?>>() {
         protected Holder<?> computeValue(final Class<?> type) {
-            return new Holder<>(type);
+            return doCompute(type);
+        }
+
+        private <S> Holder<S> doCompute(final Class<S> type) {
+            Selector<S> selector = null;
+            try {
+                final DefaultSelector defaultSelector = type.getAnnotation(DefaultSelector.class);
+                if (defaultSelector != null) {
+                    final Class<? extends Selector<?>> selectorType = defaultSelector.value();
+                    selector = (Selector<S>) selectorType.getConstructor().newInstance();
+                }
+            } catch (InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException ignored) {
+            }
+            final Holder<S> holder = new Holder<>(type);
+            holder.set(selector);
+            return holder;
         }
     };
+
+    protected Selector() {
+    }
 
     /**
      * Get the currently relevant object, or {@code null} if there is none.
