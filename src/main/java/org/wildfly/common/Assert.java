@@ -44,6 +44,23 @@ public final class Assert {
         return value;
     }
 
+    /**
+     * Check that the named parameter is not {@code null}, using a {@code NullPointerException} as some specifications
+     * require.  Use a standard exception message if it is.
+     *
+     * @param name the parameter name
+     * @param value the parameter value
+     * @param <T> the value type
+     * @return the value that was passed in
+     * @throws NullPointerException if the value is {@code null}
+     */
+    @org.jetbrains.annotations.NotNull
+    public static <T> T checkNotNullParamWithNullPointerException(String name, T value) throws NullPointerException {
+        checkNotNullParamChecked("name", name);
+        if (value == null) throw CommonMessages.msg.nullParamNPE(name);
+        return value;
+    }
+
     private static <T> void checkNotNullParamChecked(final String name, final T value) {
         if (value == null) throw CommonMessages.msg.nullParam(name);
     }

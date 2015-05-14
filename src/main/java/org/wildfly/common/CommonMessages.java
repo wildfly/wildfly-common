@@ -49,6 +49,9 @@ interface CommonMessages {
     @Message(id = 5, value = "Array index %d of parameter '%s' may not be null")
     IllegalArgumentException nullArrayParam(int index, String name);
 
+    @Message(id = 6, value = "Parameter '%s' may not be null")
+    NullPointerException nullParamNPE(String name);
+
     // execution path validation
 
     @Message(id = 100, value = "Method \"%s\" of class \"%s\" is not implemented")
