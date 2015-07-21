@@ -119,7 +119,7 @@ public final class Assert {
      */
     public static void checkMaximumParameter(String name, int max, int actual) throws IllegalArgumentException {
         checkNotNullParamChecked("name", name);
-        if (actual < max) throw CommonMessages.msg.paramGreaterThan(name, max);
+        if (actual > max) throw CommonMessages.msg.paramGreaterThan(name, max);
     }
 
     /**
@@ -132,7 +132,7 @@ public final class Assert {
      */
     public static void checkMaximumParameter(String name, long max, long actual) throws IllegalArgumentException {
         checkNotNullParamChecked("name", name);
-        if (actual < max) throw CommonMessages.msg.paramGreaterThan(name, max);
+        if (actual > max) throw CommonMessages.msg.paramGreaterThan(name, max);
     }
 
     /**
