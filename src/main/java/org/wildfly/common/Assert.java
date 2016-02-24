@@ -18,6 +18,10 @@
 
 package org.wildfly.common;
 
+import java.util.Collection;
+
+import org.wildfly.common._private.CommonMessages;
+
 /**
  * A set of assertions and checks.
  *
@@ -80,6 +84,38 @@ public final class Assert {
     public static <T> T checkNotNullArrayParam(String name, int index, T value) throws IllegalArgumentException {
         checkNotNullParamChecked("name", name);
         if (value == null) throw CommonMessages.msg.nullArrayParam(index, name);
+        return value;
+    }
+
+    /**
+     * Check that the named parameter is not empty.  Use a standard exception message if it is.
+     *
+     * @param name the parameter name
+     * @param value the parameter value
+     * @return the value that was passed in
+     * @throws IllegalArgumentException if the value is empty
+     */
+    @org.jetbrains.annotations.NotNull
+    public static String checkNotEmptyParam(String name, String value) {
+        checkNotNullParamChecked("name", name);
+        checkNotNullParamChecked("value", value);
+        if (value.isEmpty()) throw CommonMessages.msg.emptyParam(name);
+        return value;
+    }
+
+    /**
+     * Check that the named parameter is not empty.  Use a standard exception message if it is.
+     *
+     * @param name the parameter name
+     * @param value the parameter value
+     * @return the value that was passed in
+     * @throws IllegalArgumentException if the value is empty
+     */
+    @org.jetbrains.annotations.NotNull
+    public static <E, T extends Collection<E>> T checkNotEmptyParam(String name, T value) {
+        checkNotNullParamChecked("name", name);
+        checkNotNullParamChecked("value", value);
+        if (value.isEmpty()) throw CommonMessages.msg.emptyParam(name);
         return value;
     }
 
