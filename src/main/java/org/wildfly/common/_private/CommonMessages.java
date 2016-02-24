@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source.
- * Copyright 2014 Red Hat, Inc., and individual contributors
+ * Copyright 2016 Red Hat, Inc., and individual contributors
  * as indicated by the @author tags.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,17 +16,22 @@
  * limitations under the License.
  */
 
-package org.wildfly.common;
+package org.wildfly.common._private;
+
+import java.security.Permission;
+import java.security.PrivilegedActionException;
 
 import org.jboss.logging.Messages;
+import org.jboss.logging.annotations.Cause;
 import org.jboss.logging.annotations.Message;
 import org.jboss.logging.annotations.MessageBundle;
+import org.wildfly.common.context.ContextPermission;
 
 /**
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  */
 @MessageBundle(projectCode = "COM", length = 5)
-interface CommonMessages {
+public interface CommonMessages {
     CommonMessages msg = Messages.getBundle(CommonMessages.class);
 
     // simple validation
@@ -52,10 +57,29 @@ interface CommonMessages {
     @Message(id = 6, value = "Parameter '%s' may not be null")
     NullPointerException nullParamNPE(String name);
 
+    @Message(id = 7, value = "Invalid permission action '%s'")
+    IllegalArgumentException invalidPermissionAction(String action);
+
+    @Message(id = 8, value = "Parameter '%s' must not be empty")
+    IllegalArgumentException emptyParam(String name);
+
     // execution path validation
 
     @Message(id = 100, value = "Method \"%s\" of class \"%s\" is not implemented")
     UnsupportedOperationException unsupported(String methodName, String className);
+
+    // context classes
+
+    @Message(id = 200, value = "Privileged action failed")
+    PrivilegedActionException privilegedActionFailed(@Cause Exception e);
+
+    // permissions
+
+    @Message(id = 300, value = "Permission collection is read-only")
+    SecurityException readOnlyPermissionCollection();
+
+    @Message(id = 301, value = "Invalid permission type (expected %s, actual value was %s)")
+    IllegalArgumentException invalidPermissionType(Class<? extends Permission> expectedType, Class<? extends Permission> actualType);
 
     // assertion errors
 
