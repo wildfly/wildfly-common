@@ -18,6 +18,7 @@
 
 package org.wildfly.common.context;
 
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 import org.wildfly.common.Assert;
@@ -29,7 +30,7 @@ import org.wildfly.common.Assert;
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  */
 public final class ContextManager<C extends Contextual<C>> implements Supplier<C> {
-    private volatile Supplier<C> globalDefaultSupplier;
+    private final AtomicReference<Supplier<C>> globalDefaultSupplierRef = new AtomicReference<>();
     private final Class<C> type;
     private final String name;
     private final ThreadLocal<State<C>> stateRef = ThreadLocal.withInitial(State::new);
@@ -71,7 +72,7 @@ public final class ContextManager<C extends Contextual<C>> implements Supplier<C
         if (sm != null) {
             sm.checkPermission(new ContextPermission(name, ContextPermission.STR_GET_GLOBAL_DEF));
         }
-        final Supplier<C> globalDefault = this.globalDefaultSupplier;
+        final Supplier<C> globalDefault = globalDefaultSupplierRef.get();
         return globalDefault == null ? null : globalDefault.get();
     }
 
@@ -86,7 +87,25 @@ public final class ContextManager<C extends Contextual<C>> implements Supplier<C
         if (sm != null) {
             sm.checkPermission(new ContextPermission(name, ContextPermission.STR_SET_GLOBAL_DEF_SUP));
         }
-        this.globalDefaultSupplier = supplier;
+        globalDefaultSupplierRef.set(supplier);
+    }
+
+    /**
+     * Set the global default instance supplier, but only if it was not already set.  If no supplier is set, the given
+     * supplier supplier is queried to get the new value to set.
+     *
+     * @param supplierSupplier the supplier supplier (must not be {@code null})
+     * @return {@code true} if the supplier was set, {@code false} if it was already set to something else
+     * @see #setGlobalDefaultSupplier(Supplier)
+     */
+    public boolean setGlobalDefaultSupplierIfNotSet(final Supplier<Supplier<C>> supplierSupplier) {
+        final SecurityManager sm = System.getSecurityManager();
+        if (sm != null) {
+            sm.checkPermission(new ContextPermission(name, ContextPermission.STR_SET_GLOBAL_DEF_SUP));
+        }
+        final AtomicReference<Supplier<C>> ref = this.globalDefaultSupplierRef;
+        // try not to compute the value if not needed
+        return ref.get() == null && ref.compareAndSet(null, supplierSupplier.get());
     }
 
     /**
@@ -100,7 +119,7 @@ public final class ContextManager<C extends Contextual<C>> implements Supplier<C
         if (sm != null) {
             sm.checkPermission(new ContextPermission(name, ContextPermission.STR_GET_GLOBAL_DEF));
         }
-        this.globalDefaultSupplier = globalDefault == null ? null : () -> globalDefault;
+        globalDefaultSupplierRef.set(globalDefault == null ? null : () -> globalDefault);
     }
 
     /**
@@ -182,7 +201,7 @@ public final class ContextManager<C extends Contextual<C>> implements Supplier<C
             c = supplier.get();
             if (c != null) return c;
         }
-        supplier = globalDefaultSupplier;
+        supplier = globalDefaultSupplierRef.get();
         return supplier != null ? supplier.get() : null;
     }
 
