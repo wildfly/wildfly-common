@@ -18,6 +18,10 @@
 
 package org.wildfly.common.context;
 
+import static java.security.AccessController.doPrivileged;
+
+import java.security.PrivilegedAction;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -31,6 +35,7 @@ import org.wildfly.common.Assert;
  */
 public final class ContextManager<C extends Contextual<C>> implements Supplier<C> {
     private final AtomicReference<Supplier<C>> globalDefaultSupplierRef = new AtomicReference<>();
+    private final ConcurrentHashMap<ClassLoader, Supplier<C>> perClassLoaderDefault = new ConcurrentHashMap<>();
     private final Class<C> type;
     private final String name;
     private final ThreadLocal<State<C>> stateRef = ThreadLocal.withInitial(State::new);
@@ -123,6 +128,65 @@ public final class ContextManager<C extends Contextual<C>> implements Supplier<C
     }
 
     /**
+     * Get the class loader default instance.  Note that the class loader default is determined by way of a {@link Supplier} so
+     * the returned value may vary from call to call, depending on the policy of that {@code Supplier}.
+     *
+     * @param classLoader the class loader
+     * @return the global default, or {@code null} if none is installed or available
+     */
+    public C getClassLoaderDefault(final ClassLoader classLoader) {
+        final SecurityManager sm = System.getSecurityManager();
+        if (sm != null) {
+            sm.checkPermission(new ContextPermission(name, ContextPermission.STR_GET_CLASSLOADER_DEF));
+        }
+        if (classLoader != null) {
+            final Supplier<C> supplier = perClassLoaderDefault.get(classLoader);
+            return supplier == null ? null : supplier.get();
+        }
+        return null;
+    }
+
+    /**
+     * Set the per-class loader default instance supplier.  The supplier, if one is given, should have a reasonable policy such
+     * that callers of {@link #getClassLoaderDefault(ClassLoader)} will obtain results consistent with a general expectation of stability.
+     *
+     * @param classLoader the class loader (must not be {@code null})
+     * @param supplier the supplier, or {@code null} to remove the default for this class loader
+     */
+    public void setClassLoaderDefaultSupplier(final ClassLoader classLoader, final Supplier<C> supplier) {
+        Assert.checkNotNullParam("classLoader", classLoader);
+        final SecurityManager sm = System.getSecurityManager();
+        if (sm != null) {
+            sm.checkPermission(new ContextPermission(name, ContextPermission.STR_SET_CLASSLOADER_DEF_SUP));
+        }
+        if (supplier == null) {
+            perClassLoaderDefault.remove(classLoader);
+        } else {
+            perClassLoaderDefault.put(classLoader, supplier);
+        }
+    }
+
+    /**
+     * Set the per-class loader default instance supplier.  The supplier, if one is given, should have a reasonable policy such
+     * that callers of {@link #getClassLoaderDefault(ClassLoader)} will obtain results consistent with a general expectation of stability.
+     *
+     * @param classLoader the class loader (must not be {@code null})
+     * @param classLoaderDefault the class loader default value, or {@code null} to remove the default
+     */
+    public void setClassLoaderDefault(final ClassLoader classLoader, final C classLoaderDefault) {
+        Assert.checkNotNullParam("classLoader", classLoader);
+        final SecurityManager sm = System.getSecurityManager();
+        if (sm != null) {
+            sm.checkPermission(new ContextPermission(name, ContextPermission.STR_SET_CLASSLOADER_DEF));
+        }
+        if (classLoaderDefault == null) {
+            perClassLoaderDefault.remove(classLoader);
+        } else {
+            perClassLoaderDefault.put(classLoader, () -> classLoaderDefault);
+        }
+    }
+
+    /**
      * Get the per-thread default context instance.  Note that the per-thread default is determined by way of a {@link Supplier} so
      * the returned value may vary from call to call, depending on the policy of that {@code Supplier}.
      *
@@ -196,7 +260,20 @@ public final class ContextManager<C extends Contextual<C>> implements Supplier<C
         final State<C> state = stateRef.get();
         C c = state.current;
         if (c != null) return c;
-        Supplier<C> supplier = state.defaultSupplier;
+        final Thread currentThread = Thread.currentThread();
+        final SecurityManager sm = System.getSecurityManager();
+        ClassLoader classLoader;
+        if (sm != null) {
+            classLoader = doPrivileged((PrivilegedAction<ClassLoader>) currentThread::getContextClassLoader);
+        } else {
+            classLoader = currentThread.getContextClassLoader();
+        }
+        Supplier<C> supplier = perClassLoaderDefault.get(classLoader);
+        if (supplier != null) {
+            c = supplier.get();
+            if (c != null) return c;
+        }
+        supplier = state.defaultSupplier;
         if (supplier != null) {
             c = supplier.get();
             if (c != null) return c;
