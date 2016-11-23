@@ -52,16 +52,19 @@ public final class ContextPermission extends Permission {
 
     private static final long serialVersionUID = 2149744699461086708L;
 
-    private static final int ACTION_GET                 = 0b00000001;
-    private static final int ACTION_GET_PRIV_SUP        = 0b00000010;
-    private static final int ACTION_GET_GLOBAL_DEF      = 0b00000100;
-    private static final int ACTION_SET_GLOBAL_DEF      = 0b00001000;
-    private static final int ACTION_SET_GLOBAL_DEF_SUP  = 0b00010000;
-    private static final int ACTION_GET_THREAD_DEF      = 0b00100000;
-    private static final int ACTION_SET_THREAD_DEF      = 0b01000000;
-    private static final int ACTION_SET_THREAD_DEF_SUP  = 0b10000000;
+    private static final int ACTION_GET                     = 0b00000000001;
+    private static final int ACTION_GET_PRIV_SUP            = 0b00000000010;
+    private static final int ACTION_GET_GLOBAL_DEF          = 0b00000000100;
+    private static final int ACTION_SET_GLOBAL_DEF          = 0b00000001000;
+    private static final int ACTION_SET_GLOBAL_DEF_SUP      = 0b00000010000;
+    private static final int ACTION_GET_THREAD_DEF          = 0b00000100000;
+    private static final int ACTION_SET_THREAD_DEF          = 0b00001000000;
+    private static final int ACTION_SET_THREAD_DEF_SUP      = 0b00010000000;
+    private static final int ACTION_GET_CLASSLOADER_DEF     = 0b00100000000;
+    private static final int ACTION_SET_CLASSLOADER_DEF     = 0b01000000000;
+    private static final int ACTION_SET_CLASSLOADER_DEF_SUP = 0b10000000000;
 
-    private static final int ACTION_ALL                 = 0b11111111;
+    private static final int ACTION_ALL                     = 0b11111111111;
 
     static final String STR_GET = "get";
     static final String STR_GET_PRIV_SUP = "getPrivilegedSupplier";
@@ -71,6 +74,9 @@ public final class ContextPermission extends Permission {
     static final String STR_GET_THREAD_DEF = "getThreadDefault";
     static final String STR_SET_THREAD_DEF = "setThreadDefault";
     static final String STR_SET_THREAD_DEF_SUP = "setThreadDefaultSupplier";
+    static final String STR_GET_CLASSLOADER_DEF = "getClassLoaderDefault";
+    static final String STR_SET_CLASSLOADER_DEF = "setClassLoaderDefault";
+    static final String STR_SET_CLASSLOADER_DEF_SUP = "setClassLoaderDefaultSupplier";
 
     private final transient int actionBits;
 
@@ -120,6 +126,9 @@ public final class ContextPermission extends Permission {
             case STR_GET_THREAD_DEF: return ACTION_GET_THREAD_DEF;
             case STR_SET_THREAD_DEF: return ACTION_SET_THREAD_DEF;
             case STR_SET_THREAD_DEF_SUP: return ACTION_SET_THREAD_DEF_SUP;
+            case STR_GET_CLASSLOADER_DEF: return ACTION_GET_CLASSLOADER_DEF;
+            case STR_SET_CLASSLOADER_DEF: return ACTION_SET_CLASSLOADER_DEF;
+            case STR_SET_CLASSLOADER_DEF_SUP: return ACTION_SET_CLASSLOADER_DEF_SUP;
             case "*": return ACTION_ALL;
             case "": return 0;
             default: {
@@ -211,6 +220,9 @@ public final class ContextPermission extends Permission {
             if (isSet(actionBits, ACTION_GET_THREAD_DEF)) b.append(STR_GET_THREAD_DEF).append(',');
             if (isSet(actionBits, ACTION_SET_THREAD_DEF)) b.append(STR_SET_THREAD_DEF).append(',');
             if (isSet(actionBits, ACTION_SET_THREAD_DEF_SUP)) b.append(STR_SET_THREAD_DEF_SUP).append(',');
+            if (isSet(actionBits, ACTION_GET_CLASSLOADER_DEF)) b.append(STR_GET_CLASSLOADER_DEF).append(',');
+            if (isSet(actionBits, ACTION_SET_CLASSLOADER_DEF)) b.append(STR_SET_CLASSLOADER_DEF).append(',');
+            if (isSet(actionBits, ACTION_SET_CLASSLOADER_DEF_SUP)) b.append(STR_SET_CLASSLOADER_DEF_SUP).append(',');
             assert b.length() > 0;
             b.setLength(b.length() - 1);
             return this.actionString = b.toString();
