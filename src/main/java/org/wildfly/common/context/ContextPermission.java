@@ -24,6 +24,7 @@ import java.util.function.Supplier;
 
 import org.wildfly.common.Assert;
 import org.wildfly.common._private.CommonMessages;
+import org.wildfly.common.annotation.NotNull;
 
 /**
  * A permission object for operations on {@link ContextManager} instances.
@@ -236,7 +237,7 @@ public final class ContextPermission extends Permission {
      * @param actions the additional actions (must not be {@code null})
      * @return the new permission (not {@code null})
      */
-    @org.jetbrains.annotations.NotNull
+    @NotNull
     public ContextPermission withActions(String actions) {
         return withActionBits(parseActions(actions));
     }
@@ -255,7 +256,7 @@ public final class ContextPermission extends Permission {
      * @param actions the actions to subtract (must not be {@code null})
      * @return the new permission (not {@code null})
      */
-    @org.jetbrains.annotations.NotNull
+    @NotNull
     public ContextPermission withoutActions(String actions) {
         return withoutActionBits(parseActions(actions));
     }
