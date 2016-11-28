@@ -21,6 +21,7 @@ package org.wildfly.common;
 import java.util.Collection;
 
 import org.wildfly.common._private.CommonMessages;
+import org.wildfly.common.annotation.NotNull;
 
 /**
  * A set of assertions and checks.
@@ -41,7 +42,7 @@ public final class Assert {
      * @return the value that was passed in
      * @throws IllegalArgumentException if the value is {@code null}
      */
-    @org.jetbrains.annotations.NotNull
+    @NotNull
     public static <T> T checkNotNullParam(String name, T value) throws IllegalArgumentException {
         checkNotNullParamChecked("name", name);
         checkNotNullParamChecked(name, value);
@@ -58,7 +59,7 @@ public final class Assert {
      * @return the value that was passed in
      * @throws NullPointerException if the value is {@code null}
      */
-    @org.jetbrains.annotations.NotNull
+    @NotNull
     public static <T> T checkNotNullParamWithNullPointerException(String name, T value) throws NullPointerException {
         checkNotNullParamChecked("name", name);
         if (value == null) throw CommonMessages.msg.nullParamNPE(name);
@@ -80,7 +81,7 @@ public final class Assert {
      * @return the array element value that was passed in
      * @throws IllegalArgumentException if the value is {@code null}
      */
-    @org.jetbrains.annotations.NotNull
+    @NotNull
     public static <T> T checkNotNullArrayParam(String name, int index, T value) throws IllegalArgumentException {
         checkNotNullParamChecked("name", name);
         if (value == null) throw CommonMessages.msg.nullArrayParam(index, name);
@@ -95,7 +96,7 @@ public final class Assert {
      * @return the value that was passed in
      * @throws IllegalArgumentException if the value is empty
      */
-    @org.jetbrains.annotations.NotNull
+    @NotNull
     public static String checkNotEmptyParam(String name, String value) {
         checkNotNullParamChecked("name", name);
         checkNotNullParamChecked("value", value);
@@ -111,7 +112,7 @@ public final class Assert {
      * @return the value that was passed in
      * @throws IllegalArgumentException if the value is empty
      */
-    @org.jetbrains.annotations.NotNull
+    @NotNull
     public static <E, T extends Collection<E>> T checkNotEmptyParam(String name, T value) {
         checkNotNullParamChecked("name", name);
         checkNotNullParamChecked("value", value);
@@ -259,7 +260,7 @@ public final class Assert {
      * @param <T> the value type
      * @return the value that was passed in
      */
-    @org.jetbrains.annotations.NotNull
+    @NotNull
     public static <T> T assertNotNull(T value) {
         assert value != null : CommonMessages.msg.unexpectedNullValue();
         return value;
@@ -274,8 +275,8 @@ public final class Assert {
      * @return the value that was passed in
      * @throws IllegalArgumentException if the monitor is {@code null}
      */
-    @org.jetbrains.annotations.NotNull
-    public static <T> T assertHoldsLock(@org.jetbrains.annotations.NotNull T monitor) {
+    @NotNull
+    public static <T> T assertHoldsLock(@NotNull T monitor) {
         assert Thread.holdsLock(checkNotNullParam("monitor", monitor)) : CommonMessages.msg.expectedLockHold(monitor);
         return monitor;
     }
@@ -289,8 +290,8 @@ public final class Assert {
      * @return the value that was passed in
      * @throws IllegalArgumentException if the monitor is {@code null}
      */
-    @org.jetbrains.annotations.NotNull
-    public static <T> T assertNotHoldsLock(@org.jetbrains.annotations.NotNull T monitor) {
+    @NotNull
+    public static <T> T assertNotHoldsLock(@NotNull T monitor) {
         assert ! Thread.holdsLock(checkNotNullParam("monitor", monitor)) : CommonMessages.msg.expectedLockNotHold(monitor);
         return monitor;
     }
@@ -334,8 +335,8 @@ public final class Assert {
      * @param obj the switch case value
      * @return the exception which may be immediately thrown
      */
-    @org.jetbrains.annotations.NotNull
-    public static IllegalStateException impossibleSwitchCase(@org.jetbrains.annotations.NotNull Object obj) {
+    @NotNull
+    public static IllegalStateException impossibleSwitchCase(@NotNull Object obj) {
         Assert.checkNotNullParamChecked("obj", obj);
         return CommonMessages.msg.impossibleSwitchCase(obj);
     }
@@ -346,7 +347,7 @@ public final class Assert {
      * @param val the switch case value
      * @return the exception which may be immediately thrown
      */
-    @org.jetbrains.annotations.NotNull
+    @NotNull
     public static IllegalStateException impossibleSwitchCase(int val) {
         return CommonMessages.msg.impossibleSwitchCase(Integer.valueOf(val));
     }
@@ -357,7 +358,7 @@ public final class Assert {
      * @param val the switch case value
      * @return the exception which may be immediately thrown
      */
-    @org.jetbrains.annotations.NotNull
+    @NotNull
     public static IllegalStateException impossibleSwitchCase(long val) {
         return CommonMessages.msg.impossibleSwitchCase(Long.valueOf(val));
     }
@@ -367,7 +368,7 @@ public final class Assert {
      *
      * @return the exception
      */
-    @org.jetbrains.annotations.NotNull
+    @NotNull
     public static UnsupportedOperationException unsupported() {
         final StackTraceElement element = new Throwable().getStackTrace()[1];
         return CommonMessages.msg.unsupported(element.getMethodName(), element.getClassName());

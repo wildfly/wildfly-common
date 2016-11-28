@@ -33,6 +33,7 @@ import java.util.function.Predicate;
 
 import org.wildfly.common.Assert;
 import org.wildfly.common._private.CommonMessages;
+import org.wildfly.common.annotation.NotNull;
 import org.wildfly.common.function.ExceptionBiConsumer;
 import org.wildfly.common.function.ExceptionBiFunction;
 import org.wildfly.common.function.ExceptionBiPredicate;
@@ -56,6 +57,7 @@ public interface Contextual<C extends Contextual<C>> {
      *
      * @return the context manager (must not be {@code null})
      */
+    @NotNull
     ContextManager<C> getInstanceContextManager();
 
     /**
