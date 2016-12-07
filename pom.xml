@@ -25,7 +25,7 @@
 
     <groupId>org.wildfly.common</groupId>
     <artifactId>wildfly-common</artifactId>
-    <version>1.2.0.Beta2</version>
+    <version>1.2.0.Beta3-SNAPSHOT</version>
 
     <parent>
         <groupId>org.jboss</groupId>
