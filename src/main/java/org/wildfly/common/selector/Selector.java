@@ -23,12 +23,16 @@ import java.security.PrivilegedAction;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.wildfly.common.Assert;
+import org.wildfly.common.context.Contextual;
 
 /**
  * A selector for an object which is obtainable via static context.
  *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
+ *
+ * @deprecated Use {@link Contextual} instead.
  */
+@Deprecated
 public abstract class Selector<T> {
 
     private static final Selector<?> NULL = new Selector<Object>() {

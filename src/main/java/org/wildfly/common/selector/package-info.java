@@ -17,11 +17,9 @@
  */
 
 /**
- * Classes which implement a selector pattern, which enables a global provider of some service to be selected
- * depending on context.  Several selector implementations are provided, such as {@link org.wildfly.common.selector.GlobalSelector GlobalSelector}
- * and {@link org.wildfly.common.selector.ThreadLocalSelector ThreadLocalSelector}.  Custom implementations can be created by extending
- * the {@link org.wildfly.common.selector.Selector Selector} base class.
- *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
+ *
+ * @deprecated Use {@link org.wildfly.common.context.Contextual} instead.
  */
+@Deprecated
 package org.wildfly.common.selector;
