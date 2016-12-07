@@ -142,6 +142,7 @@ public final class References {
      */
     public static <T, A> Reference<T, A> create(Reference.Type type, T value, A attachment, ReferenceQueue<? super T> referenceQueue) {
         Assert.checkNotNullParam("type", type);
+        if (referenceQueue == null) return create(type, value, attachment);
         if (value == null) return getNullReference();
         switch (type) {
             case STRONG:
@@ -171,9 +172,8 @@ public final class References {
      * @param <T> the reference value type
      * @param <A> the reference attachment type
      * @return the reference
-     * @throws IllegalArgumentException if the reference type is {@link Reference.Type#PHANTOM}
      */
-    public static <T, A> Reference<T, A> create(Reference.Type type, T value, A attachment) throws IllegalArgumentException {
+    public static <T, A> Reference<T, A> create(Reference.Type type, T value, A attachment) {
         Assert.checkNotNullParam("type", type);
         if (value == null) return getNullReference();
         switch (type) {
