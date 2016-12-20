@@ -18,6 +18,8 @@
 
 package org.wildfly.common.function;
 
+import org.wildfly.common.Assert;
+
 /**
  * A two-argument function which can throw an exception.
  *
@@ -34,4 +36,9 @@ public interface ExceptionToLongBiFunction<T, U, E extends Exception> {
      * @throws E if an exception occurs
      */
     long apply(T t, U u) throws E;
+
+    default <R> ExceptionBiFunction<T, U, R, E> andThen(ExceptionLongFunction<R, E> after) {
+        Assert.checkNotNullParam("after", after);
+        return (t, u) -> after.apply(apply(t, u));
+    }
 }
