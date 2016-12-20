@@ -30,7 +30,7 @@
     <parent>
         <groupId>org.jboss</groupId>
         <artifactId>jboss-parent</artifactId>
-        <version>16</version>
+        <version>21</version>
     </parent>
 
     <properties>
@@ -71,18 +71,12 @@
                 <configuration>
                     <detectJavaApiLink>false</detectJavaApiLink>
                     <detectLinks>false</detectLinks>
-                    <doclet>net.gleamynode.apiviz.APIviz</doclet>
-                    <docletArtifact>
-                        <groupId>org.jboss.apiviz</groupId>
-                        <artifactId>apiviz</artifactId>
-                        <version>1.3.2.GA</version>
-                    </docletArtifact>
                     <doctitle><![CDATA[WildFly Common ]]>${project.version}</doctitle>
                     <header><![CDATA[WildFly Common ]]>${project.version}</header>
                     <footer><![CDATA[WildFly Common  ]]>${project.version}</footer>
                     <bottom><![CDATA[<i>Copyright &#169; 2015 JBoss, a division of Red Hat, Inc.</i>]]></bottom>
                     <links>
-                        <link>http://java.sun.com/javase/7/docs/api/</link>
+                        <link>http://java.sun.com/javase/8/docs/api/</link>
                     </links>
                 </configuration>
             </plugin>
