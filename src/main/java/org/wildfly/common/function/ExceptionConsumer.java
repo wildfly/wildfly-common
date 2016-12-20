@@ -18,6 +18,8 @@
 
 package org.wildfly.common.function;
 
+import org.wildfly.common.Assert;
+
 /**
  * A one-argument consumer which can throw an exception.
  *
@@ -32,4 +34,25 @@ public interface ExceptionConsumer<T, E extends Exception> {
      * @throws E if an exception occurs
      */
     void accept(T t) throws E;
+
+    default ExceptionConsumer<T, E> andThen(ExceptionConsumer<? super T, ? extends E> after) {
+        Assert.checkNotNullParam("after", after);
+        return t -> {
+            accept(t);
+            after.accept(t);
+        };
+    }
+
+    default ExceptionConsumer<T, E> compose(ExceptionConsumer<? super T, ? extends E> before) {
+        Assert.checkNotNullParam("before", before);
+        return t -> {
+            accept(t);
+            before.accept(t);
+        };
+    }
+
+    default ExceptionRunnable<E> compose(ExceptionSupplier<? extends T, ? extends E> before) {
+        Assert.checkNotNullParam("before", before);
+        return () -> accept(before.get());
+    }
 }
