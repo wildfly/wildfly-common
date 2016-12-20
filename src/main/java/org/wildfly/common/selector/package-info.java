@@ -21,5 +21,4 @@
  *
  * @deprecated Use {@link org.wildfly.common.context.Contextual} instead.
  */
-@Deprecated
 package org.wildfly.common.selector;
