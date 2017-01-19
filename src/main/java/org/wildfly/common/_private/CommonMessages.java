@@ -25,7 +25,6 @@ import org.jboss.logging.Messages;
 import org.jboss.logging.annotations.Cause;
 import org.jboss.logging.annotations.Message;
 import org.jboss.logging.annotations.MessageBundle;
-import org.wildfly.common.context.ContextPermission;
 
 /**
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
@@ -62,6 +61,15 @@ public interface CommonMessages {
 
     @Message(id = 8, value = "Parameter '%s' must not be empty")
     IllegalArgumentException emptyParam(String name);
+
+    @Message(id = 9, value = "Invalid expression syntax at position %d")
+    String invalidExpressionSyntax(int index);
+
+    @Message(id = 10, value = "No environment property found named \"%s\"")
+    IllegalArgumentException unresolvedEnvironmentProperty(String name);
+
+    @Message(id = 11, value = "No system property found named \"%s\"")
+    IllegalArgumentException unresolvedSystemProperty(String name);
 
     // execution path validation
 
