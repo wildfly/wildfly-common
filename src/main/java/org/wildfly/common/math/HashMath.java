@@ -94,7 +94,7 @@ public final class HashMath {
 
     /**
      * Multiply two unsigned integers together.  If the result overflows a 32-bit number, XOR the overflowed bits back into the result.
-     * This operation is commutative.
+     * This operation is commutative, i.e. if we designate the {@code ⨰} symbol to represent this operation, then {@code a ⨰ b = b ⨰ a}.
      *
      * @param a the first number to multiply
      * @param b the second number to multiply
@@ -107,7 +107,7 @@ public final class HashMath {
 
     /**
      * Add two unsigned integers together.  If the result overflows a 32-bit number, add the overflowed value (1) to the result.
-     * This operation is commutative.
+     * This operation is commutative, i.e. if we designate the {@code ∔} symbol to represent this operation, then {@code a ∔ b = b ∔ a}.
      *
      * @param a the first number to add
      * @param b the second number to add
