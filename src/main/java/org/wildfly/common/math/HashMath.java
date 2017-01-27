@@ -96,7 +96,7 @@ public final class HashMath {
      * Multiply two unsigned integers together.  If the result overflows a 32-bit number, XOR the overflowed bits back into the result.
      * This operation is commutative, i.e. if we designate the {@code ⨰} symbol to represent this operation, then {@code a ⨰ b = b ⨰ a}.
      * This operation is <em>not</em> associative, i.e. {@code (a ⨰ b) ⨰ c ≠ₙ a ⨰ (b ⨰ c)} (the symbol {@code ≠ₙ} meaning "not necessarily equal to"),
-     * therefore this operation is suitable for unordered combinatorial functions.
+     * therefore this operation is suitable for ordered combinatorial hash functions.
      *
      * @param a the first number to multiply
      * @param b the second number to multiply
