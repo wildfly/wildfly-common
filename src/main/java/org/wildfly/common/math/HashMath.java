@@ -31,7 +31,7 @@ public final class HashMath {
     }
 
     /**
-     * A hash function which combines an accumulated hash with a next hash such that {@code f(f(k, p2, b), p1, a) != f(f(k, p1, a), p2, b)}.
+     * A hash function which combines an accumulated hash with a next hash such that {@code f(f(k, p2, b), p1, a) ≠ₙ f(f(k, p1, a), p2, b)}.
      * This function is suitable for object chains whose order affects the overall equality of the hash code.
      * <p>
      * The exact algorithm is not specified and is therefore subject to change and should not be relied upon for hash
@@ -43,11 +43,11 @@ public final class HashMath {
      * @return the new accumulated hash code
      */
     public static int multiHashOrdered(int accumulatedHash, int prime, int nextHash) {
-        return addWrap(multiplyWrap(accumulatedHash, prime), nextHash);
+        return multiplyWrap(accumulatedHash, prime) + nextHash;
     }
 
     /**
-     * A hash function which combines an accumulated hash with a next hash such that {@code f(f(k, p2, b), p1, a) == f(f(k, p1, a), p2, b)}.
+     * A hash function which combines an accumulated hash with a next hash such that {@code f(f(k, p2, b), p1, a) = f(f(k, p1, a), p2, b)}.
      * This function is suitable for object chains whose order does not affect the overall equality of the hash code.
      * <p>
      * The exact algorithm is not specified and is therefore subject to change and should not be relied upon for hash
@@ -59,11 +59,11 @@ public final class HashMath {
      * @return the new accumulated hash code
      */
     public static int multiHashUnordered(int accumulatedHash, int prime, int nextHash) {
-        return addWrap(multiplyWrap(nextHash, prime), accumulatedHash);
+        return multiplyWrap(nextHash, prime) + accumulatedHash;
     }
 
     /**
-     * A hash function which combines an accumulated hash with a next hash such that {@code f(f(k, b), a) != f(f(k, a), b)}.
+     * A hash function which combines an accumulated hash with a next hash such that {@code f(f(k, b), a) ≠ₙ f(f(k, a), b)}.
      * This function is suitable for object chains whose order affects the overall equality of the hash code.
      * <p>
      * The exact algorithm is not specified and is therefore subject to change and should not be relied upon for hash
@@ -78,7 +78,7 @@ public final class HashMath {
     }
 
     /**
-     * A hash function which combines an accumulated hash with a next hash such that {@code f(f(k, b), a) == f(f(k, a), b)}.
+     * A hash function which combines an accumulated hash with a next hash such that {@code f(f(k, b), a) = f(f(k, a), b)}.
      * This function is suitable for object chains whose order does not affect the overall equality of the hash code.
      * <p>
      * The exact algorithm is not specified and is therefore subject to change and should not be relied upon for hash
@@ -95,6 +95,8 @@ public final class HashMath {
     /**
      * Multiply two unsigned integers together.  If the result overflows a 32-bit number, XOR the overflowed bits back into the result.
      * This operation is commutative, i.e. if we designate the {@code ⨰} symbol to represent this operation, then {@code a ⨰ b = b ⨰ a}.
+     * This operation is <em>not</em> associative, i.e. {@code (a ⨰ b) ⨰ c ≠ₙ a ⨰ (b ⨰ c)} (the symbol {@code ≠ₙ} meaning "not necessarily equal to"),
+     * therefore this operation is suitable for unordered combinatorial functions.
      *
      * @param a the first number to multiply
      * @param b the second number to multiply
@@ -103,23 +105,5 @@ public final class HashMath {
     public static int multiplyWrap(int a, int b) {
         long r1 = (long) a * b;
         return (int) r1 ^ (int) (r1 >>> 32);
-    }
-
-    /**
-     * Add two unsigned integers together.  If the result overflows a 32-bit number, add the overflowed value (1) to the result.
-     * This operation is commutative, i.e. if we designate the {@code ∔} symbol to represent this operation, then {@code a ∔ b = b ∔ a}.
-     *
-     * @param a the first number to add
-     * @param b the second number to add
-     * @return the wrapped addition result
-     */
-    public static int addWrap(int a, int b) {
-        int r1 = a + b;
-        // this is the same trick that Math.addExact uses to know if there was an overflow
-        if (((a ^ r1) & (b ^ r1)) < 0) {
-            return r1 + 1;
-        } else {
-            return r1;
-        }
     }
 }

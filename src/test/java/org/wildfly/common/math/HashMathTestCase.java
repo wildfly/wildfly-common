@@ -19,40 +19,42 @@
 package org.wildfly.common.math;
 
 import static org.junit.Assert.*;
+import static org.wildfly.common.math.HashMath.multiHashOrdered;
+import static org.wildfly.common.math.HashMath.multiHashUnordered;
 
 import org.junit.Test;
 
 public class HashMathTestCase {
 
     @Test
-    public void testOrdered() {
-        final int ab = HashMath.multiHashOrdered(HashMath.multiHashOrdered(1234, 65537, 13), 16633, 5342);
-        final int ba = HashMath.multiHashOrdered(HashMath.multiHashOrdered(1234, 16633, 5342), 65537, 13);
+    public void testOrderedCommutative() {
+        final int ab = multiHashOrdered(multiHashOrdered(1234, 65537, 13), 16633, 5342);
+        final int ba = multiHashOrdered(multiHashOrdered(1234, 16633, 5342), 65537, 13);
         assertNotEquals(ab, ba);
-        final int cd = HashMath.multiHashOrdered(HashMath.multiHashOrdered(0, 65537, 13), 16633, 5342);
-        final int dc = HashMath.multiHashOrdered(HashMath.multiHashOrdered(0, 16633, 5342), 65537, 13);
+        final int cd = multiHashOrdered(multiHashOrdered(0, 65537, 13), 16633, 5342);
+        final int dc = multiHashOrdered(multiHashOrdered(0, 16633, 5342), 65537, 13);
         assertNotEquals(cd, dc);
-        final int ef = HashMath.multiHashOrdered(HashMath.multiHashOrdered(0xf948_1829, 65537, 13), 16633, 5342);
-        final int fe = HashMath.multiHashOrdered(HashMath.multiHashOrdered(0xf948_1829, 16633, 5342), 65537, 13);
+        final int ef = multiHashOrdered(multiHashOrdered(0xf948_1829, 65537, 13), 16633, 5342);
+        final int fe = multiHashOrdered(multiHashOrdered(0xf948_1829, 16633, 5342), 65537, 13);
         assertNotEquals(ef, fe);
-        final int gh = HashMath.multiHashOrdered(HashMath.multiHashOrdered(0xf948_1829, 65537, 13), 16633, 0);
-        final int hg = HashMath.multiHashOrdered(HashMath.multiHashOrdered(0xf948_1829, 16633, 0), 65537, 13);
+        final int gh = multiHashOrdered(multiHashOrdered(0xf948_1829, 65537, 13), 16633, 0);
+        final int hg = multiHashOrdered(multiHashOrdered(0xf948_1829, 16633, 0), 65537, 13);
         assertNotEquals(gh, hg);
     }
 
     @Test
-    public void testUnordered() {
-        final int ab = HashMath.multiHashUnordered(HashMath.multiHashUnordered(1234, 65537, 13), 16633, 5342);
-        final int ba = HashMath.multiHashUnordered(HashMath.multiHashUnordered(1234, 16633, 5342), 65537, 13);
+    public void testUnorderedCommutative() {
+        final int ab = multiHashUnordered(multiHashUnordered(1234, 65537, 13), 16633, 5342);
+        final int ba = multiHashUnordered(multiHashUnordered(1234, 16633, 5342), 65537, 13);
         assertEquals(ab, ba);
-        final int cd = HashMath.multiHashUnordered(HashMath.multiHashUnordered(0, 65537, 13), 16633, 5342);
-        final int dc = HashMath.multiHashUnordered(HashMath.multiHashUnordered(0, 16633, 5342), 65537, 13);
+        final int cd = multiHashUnordered(multiHashUnordered(0, 65537, 13), 16633, 5342);
+        final int dc = multiHashUnordered(multiHashUnordered(0, 16633, 5342), 65537, 13);
         assertEquals(cd, dc);
-        final int ef = HashMath.multiHashUnordered(HashMath.multiHashUnordered(0xf948_1829, 65537, 13), 16633, 5342);
-        final int fe = HashMath.multiHashUnordered(HashMath.multiHashUnordered(0xf948_1829, 16633, 5342), 65537, 13);
+        final int ef = multiHashUnordered(multiHashUnordered(0xf948_1829, 65537, 13), 16633, 5342);
+        final int fe = multiHashUnordered(multiHashUnordered(0xf948_1829, 16633, 5342), 65537, 13);
         assertEquals(ef, fe);
-        final int gh = HashMath.multiHashUnordered(HashMath.multiHashUnordered(0xf948_1829, 65537, 13), 16633, 0);
-        final int hg = HashMath.multiHashUnordered(HashMath.multiHashUnordered(0xf948_1829, 16633, 0), 65537, 13);
+        final int gh = multiHashUnordered(multiHashUnordered(0xf948_1829, 65537, 13), 16633, 0);
+        final int hg = multiHashUnordered(multiHashUnordered(0xf948_1829, 16633, 0), 65537, 13);
         assertEquals(gh, hg);
     }
 }
