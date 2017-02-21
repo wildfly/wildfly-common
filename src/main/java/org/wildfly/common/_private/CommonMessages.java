@@ -71,6 +71,9 @@ public interface CommonMessages {
     @Message(id = 11, value = "No system property found named \"%s\"")
     IllegalArgumentException unresolvedSystemProperty(String name);
 
+    @Message(id = 12, value = "Invalid address length of %d; must be 4 or 16")
+    IllegalArgumentException invalidAddressBytes(int length);
+
     // execution path validation
 
     @Message(id = 100, value = "Method \"%s\" of class \"%s\" is not implemented")
