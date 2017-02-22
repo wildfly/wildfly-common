@@ -18,6 +18,7 @@
 
 package org.wildfly.common._private;
 
+import java.io.IOException;
 import java.security.Permission;
 import java.security.PrivilegedActionException;
 
@@ -91,6 +92,23 @@ public interface CommonMessages {
 
     @Message(id = 301, value = "Invalid permission type (expected %s, actual value was %s)")
     IllegalArgumentException invalidPermissionType(Class<? extends Permission> expectedType, Class<? extends Permission> actualType);
+
+    // rpc package
+
+    @Message(id = 400, value = "Invalid serialized remote exception cause object with odd number of strings in fields key/value list")
+    IllegalStateException invalidOddFields();
+
+    @Message(id = 401, value = "Field name or field value cannot be null")
+    IllegalArgumentException cannotContainNullFieldNameOrValue();
+
+    @Message(id = 402, value = "Remote exception stream is corrupted and cannot be read")
+    IOException corruptedStream();
+
+    @Message(value = "Remote exception %s: %s")
+    String remoteException(String exceptionClassName, String message);
+
+    @Message(value = "Remote exception %s")
+    String remoteException(String exceptionClassName);
 
     // assertion errors
 
