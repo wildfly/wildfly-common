@@ -30,14 +30,6 @@ import org.junit.Test;
  */
 public class InetTest {
 
-    static byte[] bytesOf(int... vals) {
-        final byte[] array = new byte[vals.length];
-        for (int i = 0; i < array.length; i++) {
-            array[i] = (byte) vals[i];
-        }
-        return array;
-    }
-
     @Test
     public void testRepresentation1() throws Exception {
         assertEquals("::1", toOptimalString(InetAddress.getByName("0:0::1")));
