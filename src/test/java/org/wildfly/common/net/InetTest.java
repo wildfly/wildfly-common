@@ -46,4 +46,11 @@ public class InetTest {
         assertEquals("::ffff:0:127.0.0.1", toOptimalString(InetAddress.getByName("0::ffff:0:127.0.0.1")));
         assertEquals("::ffff:127.0.0.1", toOptimalString(toInet6Address(getInet4Address(127,0,0,1))));
     }
+
+    @Test
+    public void testUnresolved() throws Exception {
+        assertEquals("foo bar", getHostNameIfResolved(InetAddress.getByAddress("foo bar", new byte[]{ 127, 0, 0, 1})));
+        assertEquals("", getHostNameIfResolved(InetAddress.getByAddress("", new byte[]{ 127, 0, 0, 1})));
+        assertNull(getHostNameIfResolved(InetAddress.getByAddress(new byte[]{ 127, 0, 0, 1})));
+    }
 }

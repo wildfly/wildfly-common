@@ -101,7 +101,7 @@ public final class Inet {
         final int slash = toString.lastIndexOf('/');
         if (slash == 0) {
             // it might be unresolved or it might explicitly be ""
-            return hostString == "" ? "" : null;
+            return hostString.isEmpty() ? "" : null;
         }
         return hostString;
     }
