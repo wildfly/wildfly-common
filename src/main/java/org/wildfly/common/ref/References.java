@@ -59,14 +59,12 @@ public final class References {
 
         static {
             final AtomicInteger cnt = new AtomicInteger(1);
-            final PrivilegedAction<Void> action = new PrivilegedAction<Void>() {
-                public Void run() {
-                    final ReaperThread thr = new ReaperThread();
-                    thr.setName("Reference Reaper #" + cnt.getAndIncrement());
-                    thr.setDaemon(true);
-                    thr.start();
-                    return null;
-                }
+            final PrivilegedAction<Void> action = () -> {
+                final ReaperThread thr = new ReaperThread();
+                thr.setName("Reference Reaper #" + cnt.getAndIncrement());
+                thr.setDaemon(true);
+                thr.start();
+                return null;
             };
             for (int i = 0; i < 3; i ++) {
                 doPrivileged(action);

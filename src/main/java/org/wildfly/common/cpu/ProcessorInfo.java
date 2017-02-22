@@ -18,7 +18,6 @@ package org.wildfly.common.cpu;
  */
 
 import java.io.BufferedReader;
-import java.io.Closeable;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -52,11 +51,7 @@ public class ProcessorInfo {
      */
     public static int availableProcessors() {
         if (System.getSecurityManager() != null) {
-            return AccessController.doPrivileged(new PrivilegedAction<Integer>() {
-                public Integer run() {
-                    return determineProcessors();
-                }
-            });
+            return AccessController.doPrivileged((PrivilegedAction<Integer>) () -> Integer.valueOf(determineProcessors())).intValue();
         }
 
         return determineProcessors();

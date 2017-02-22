@@ -177,11 +177,7 @@ public abstract class Selector<T> {
      */
     public static <T> PrivilegedAction<Getter<T>> selectorGetterActionFor(final Class<T> clazz) {
         Assert.checkNotNullParam("clazz", clazz);
-        return new PrivilegedAction<Getter<T>>() {
-            public Getter<T> run() {
-                return selectorGetterFor(clazz);
-            }
-        };
+        return () -> selectorGetterFor(clazz);
     }
 
     /**
