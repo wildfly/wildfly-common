@@ -210,6 +210,22 @@ public final class RemoteExceptionCause extends Throwable {
     }
 
     /**
+     * Convert this remote exception cause to a plain throwable for sending to peers which use serialization and do not
+     * have this class present.  Note that this does not recursively apply; normally, a serialization framework will
+     * handle the recursive application of this operation through object resolution.
+     *
+     * @return the throwable (not {@code null})
+     */
+    public Throwable toPlainThrowable() {
+        final Throwable throwable = new Throwable(toString(), getCause());
+        throwable.setStackTrace(getStackTrace());
+        for (Throwable s : getSuppressed()) {
+            throwable.addSuppressed(s);
+        }
+        return throwable;
+    }
+
+    /**
      * Get the original exception class name.
      *
      * @return the original exception class name (not {@code null})
