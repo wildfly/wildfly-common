@@ -94,6 +94,7 @@ public final class RemoteExceptionCause extends Throwable {
 
     private final String exceptionClassName;
     private final Map<String, String> fields;
+    private transient String toString;
 
     RemoteExceptionCause(final String msg, final RemoteExceptionCause cause, final String exceptionClassName, final Map<String, String> fields, boolean cloneFields) {
         super(msg);
@@ -245,8 +246,18 @@ public final class RemoteExceptionCause extends Throwable {
      * @return the string representation of the exception
      */
     public String toString() {
-        final String message = getMessage();
-        return message == null ? CommonMessages.msg.remoteException(exceptionClassName) : CommonMessages.msg.remoteException(exceptionClassName, message);
+        final String toString = this.toString;
+        if (toString == null) {
+            final String message = getMessage();
+            StringBuilder b = new StringBuilder();
+            b.append(message == null ? CommonMessages.msg.remoteException(exceptionClassName) : CommonMessages.msg.remoteException(exceptionClassName, message));
+            for (Map.Entry<String, String> entry : fields.entrySet()) {
+                b.append(System.lineSeparator());
+                b.append('\t').append(entry.getKey()).append('=').append(entry.getValue());
+            }
+            return this.toString = b.toString();
+        }
+        return toString;
     }
 
     // Format:
@@ -298,7 +309,7 @@ public final class RemoteExceptionCause extends Throwable {
 
     private static void writePackedInt(DataOutput os, int val) throws IOException {
         if (-0x10 <= val && val < 0x10) {
-            os.write(ST_INT_MINI | val & 0b11_1111);
+            os.write(ST_INT_MINI | val & 0b01_1111);
         } else if (-0x80 <= val && val < 0x80) {
             os.write(ST_INT8);
             os.write(val);
