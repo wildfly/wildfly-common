@@ -32,6 +32,7 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.function.Function;
 
 import org.wildfly.common.Assert;
@@ -77,7 +78,7 @@ public final class RemoteExceptionCause extends Throwable {
                 };
             }
             return t -> {
-                Map<String, String> map = new HashMap<>(finalFields.length);
+                Map<String, String> map = new TreeMap<>();
                 for (Field field : finalFields) {
                     try {
                         map.put(field.getName(), String.valueOf(field.get(t)));
@@ -117,7 +118,7 @@ public final class RemoteExceptionCause extends Throwable {
                 if (! iterator.hasNext()) {
                     this.fields = Collections.singletonMap(name1, value1);
                 } else {
-                    Map<String, String> map = new HashMap<>(fields.size());
+                    Map<String, String> map = new TreeMap<>();
                     map.put(name1, value1);
                     do {
                         final Map.Entry<String, String> next = iterator.next();
@@ -267,9 +268,13 @@ public final class RemoteExceptionCause extends Throwable {
             final String message = getMessage();
             StringBuilder b = new StringBuilder();
             b.append(message == null ? CommonMessages.msg.remoteException(exceptionClassName) : CommonMessages.msg.remoteException(exceptionClassName, message));
-            for (Map.Entry<String, String> entry : fields.entrySet()) {
-                b.append(System.lineSeparator());
-                b.append('\t').append(entry.getKey()).append('=').append(entry.getValue());
+            Iterator<Map.Entry<String, String>> iterator = fields.entrySet().iterator();
+            if (iterator.hasNext()) {
+                b.append("\n\tPublic fields:");
+                do {
+                    final Map.Entry<String, String> entry = iterator.next();
+                    b.append('\n').append('\t').append('\t').append(entry.getKey()).append('=').append(entry.getValue());
+                } while (iterator.hasNext());
             }
             return this.toString = b.toString();
         }
@@ -283,6 +288,7 @@ public final class RemoteExceptionCause extends Throwable {
     //   count ( field-name field-value )*
     //   null | caused-by
     //   count suppressed*
+    // Add new data to the end; old versions must ignore extra data
 
     private static final int ST_NULL = 0;
     private static final int ST_NEW_STRING = 1; // utf8 data follows
@@ -647,7 +653,7 @@ public final class RemoteExceptionCause extends Throwable {
                 } else if (fl == 2) {
                     fields = Collections.singletonMap(f[0], f[1]);
                 } else {
-                    final HashMap<String, String> map = new HashMap<>(fl >> 1);
+                    final TreeMap<String, String> map = new TreeMap<>();
                     for (int i = 0; i < fl; i += 2) {
                         map.put(f[i], f[i + 1]);
                     }
