@@ -36,6 +36,31 @@ public final class Inet {
     private Inet() {}
 
     /**
+     * The "any" address for IPv4.
+     */
+    public static final Inet4Address INET4_ANY = getInet4Address(0, 0, 0, 0);
+
+    /**
+     * The traditional loopback address for IPv4.
+     */
+    public static final Inet4Address INET4_LOOPBACK = getInet4Address(127, 0, 0, 1);
+
+    /**
+     * The broadcast-all address for IPv4.
+     */
+    public static final Inet4Address INET4_BROADCAST = getInet4Address(255, 255, 255, 255);
+
+    /**
+     * The "any" address for IPv6.
+     */
+    public static final Inet6Address INET6_ANY = getInet6Address(0, 0, 0, 0, 0, 0, 0, 0);
+
+    /**
+     * The loopback address for IPv6.
+     */
+    public static final Inet6Address INET6_LOOPBACK = getInet6Address(0, 0, 0, 0, 0, 0, 0, 1);
+
+    /**
      * Get the optimal string representation of an IP address.  For IPv6 addresses, this representation will be
      * more compact that the default.
      *
