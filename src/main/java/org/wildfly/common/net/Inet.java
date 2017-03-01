@@ -229,6 +229,25 @@ public final class Inet {
     }
 
     /**
+     * Parse an IPv6 address into an {@code Inet6Address} object.
+     *
+     * @param address the address to parse
+     * @return the parsed address, or {@code null} if the address is not valid
+     */
+    public static Inet6Address parseInet6Address(String address) {
+        final byte[] bytes = parseInet6AddressToBytes(address);
+        if (bytes == null) {
+            return null;
+        }
+        try {
+            return Inet6Address.getByAddress(address, bytes, 0);
+        } catch (UnknownHostException e) {
+            // not possible
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /**
      * Converts IPv6 address from textual representation to bytes.
      * <p>
      * If given string doesn't represent valid IPv6 address, the method returns {@code null}.
