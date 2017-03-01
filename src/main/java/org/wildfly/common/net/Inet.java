@@ -222,7 +222,7 @@ public final class Inet {
      * Checks whether given String is a valid IPv6 address.
      *
      * @param address address textual representation
-     * @return is valid IPv6 address?
+     * @return {@code true} if {@code address} is a valid IPv6 address, {@code false} otherwise
      */
     public static boolean isIPv6Address(String address) {
         return toAddressBytesV6(address) != null;
@@ -230,11 +230,11 @@ public final class Inet {
 
     /**
      * Converts IPv6 address from textual representation to bytes.
-     *
-     * If given string doesn't represent valid IPv6 address, returns {@code null}.
+     * <p>
+     * If given string doesn't represent valid IPv6 address, the method returns {@code null}.
      *
      * @param address address textual representation
-     * @return byte array representing the address
+     * @return byte array representing the address, or {@code null} if the address is not valid
      */
     public static byte[] toAddressBytesV6(String address) {
         if (address == null || address.isEmpty()) {
