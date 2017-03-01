@@ -69,25 +69,25 @@ public class InetTest {
         checkAddressToBytes("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff");
         checkAddressToBytes("000F:00EF:0DEF:CDEF::");
 
-        assertArrayEquals(bytes(0, 0, 0, 0, 0, 0xffff, 0x0a00, 1), toAddressBytesV6("::ffff:10.0.0.1"));
-        assertArrayEquals(bytes(0, 0, 0, 0, 0, 0, 0x7f00, 1), toAddressBytesV6("::127.0.0.1"));
-        assertArrayEquals(bytes(0, 0, 0, 0, 0, 0, 0x7f00, 1), toAddressBytesV6("0:0:0:0:0:0:127.0.0.1"));
+        assertArrayEquals(bytes(0, 0, 0, 0, 0, 0xffff, 0x0a00, 1), parseInet6AddressToBytes("::ffff:10.0.0.1"));
+        assertArrayEquals(bytes(0, 0, 0, 0, 0, 0, 0x7f00, 1), parseInet6AddressToBytes("::127.0.0.1"));
+        assertArrayEquals(bytes(0, 0, 0, 0, 0, 0, 0x7f00, 1), parseInet6AddressToBytes("0:0:0:0:0:0:127.0.0.1"));
 
-        assertNull(toAddressBytesV6("1:2:3:4:5:6:7"));
-        assertNull(toAddressBytesV6("1:2:3:4:5:6:7:8:9"));
-        assertNull(toAddressBytesV6("1:2:3:4:5:6:7:1.1.1.1"));
-        assertNull(toAddressBytesV6("1:2:3:4:5:1.1.1.1"));
-        assertNull(toAddressBytesV6("1:2::5::8"));
-        assertNull(toAddressBytesV6("1:2:::8"));
-        assertNull(toAddressBytesV6("1:2:::10000"));
-        assertNull(toAddressBytesV6("1:2:::x"));
-        assertNull(toAddressBytesV6("::1.2.3"));
-        assertNull(toAddressBytesV6("::1.2.3.4.5"));
-        assertNull(toAddressBytesV6("::1.2.3.256"));
+        assertNull(parseInet6AddressToBytes("1:2:3:4:5:6:7"));
+        assertNull(parseInet6AddressToBytes("1:2:3:4:5:6:7:8:9"));
+        assertNull(parseInet6AddressToBytes("1:2:3:4:5:6:7:1.1.1.1"));
+        assertNull(parseInet6AddressToBytes("1:2:3:4:5:1.1.1.1"));
+        assertNull(parseInet6AddressToBytes("1:2::5::8"));
+        assertNull(parseInet6AddressToBytes("1:2:::8"));
+        assertNull(parseInet6AddressToBytes("1:2:::10000"));
+        assertNull(parseInet6AddressToBytes("1:2:::x"));
+        assertNull(parseInet6AddressToBytes("::1.2.3"));
+        assertNull(parseInet6AddressToBytes("::1.2.3.4.5"));
+        assertNull(parseInet6AddressToBytes("::1.2.3.256"));
     }
 
     private void checkAddressToBytes(String ipv6) throws UnknownHostException {
-        byte[] bytes = toAddressBytesV6(ipv6);
+        byte[] bytes = parseInet6AddressToBytes(ipv6);
         assertNotNull(bytes);
         assertArrayEquals(InetAddress.getByName(ipv6).getAddress(), bytes);
     }
