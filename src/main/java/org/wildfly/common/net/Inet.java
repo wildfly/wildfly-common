@@ -23,6 +23,7 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 
 import org.wildfly.common.Assert;
 import org.wildfly.common._private.CommonMessages;
@@ -190,6 +191,150 @@ public final class Inet {
             // not possible
             throw new IllegalStateException(e);
         }
+    }
+
+    /**
+     * Checks whether given String is a valid IPv6 address.
+     *
+     * @param address address textual representation
+     * @return is valid IPv6 address?
+     */
+    public static boolean isIPv6Address(String address) {
+        return toAddressBytesV6(address) != null;
+    }
+
+    /**
+     * Converts IPv6 address from textual representation to bytes.
+     *
+     * If given string doesn't represent valid IPv6 address, returns {@code null}.
+     *
+     * @param address address textual representation
+     * @return byte array representing the address
+     */
+    public static byte[] toAddressBytesV6(String address) {
+        if (address == null || address.isEmpty()) {
+            return null;
+        }
+
+        // remove brackets if present
+        if (address.startsWith("[") && address.endsWith("]")) {
+            address = address.substring(1, address.length() - 1);
+        }
+
+        String[] segments = address.split(":", 10);
+
+        // there can be minimum of 2 and maximum of 8 colons, which makes 3 respectively 9 segments
+        if (segments.length > 9 || segments.length < 3) {
+            return null;
+        }
+        // if the first segment is empty, the second one must be too - "::<address end>"
+        if (segments[0].length() == 0 && segments[1].length() != 0) {
+            return null;
+        }
+        // if the last segment is empty, the segment before it must be too - "<address beginning>::"
+        if (segments[segments.length - 1].length() == 0 && segments[segments.length - 2].length() != 0) {
+            return null;
+        }
+
+        // validate segments
+        for (int i = 0; i < segments.length; i++) {
+            for (int charIdx = 0; charIdx < segments[i].length(); charIdx++) {
+                char c = segments[i].charAt(charIdx);
+                if (c == '.' && i != segments.length - 1) {
+                    return null; // "." is allowed in the last segment only
+                } else if (c != '.' && c != ':' && Character.digit(c, 16) == -1) {
+                    return null; // not ".", ":" or a digit
+                }
+            }
+        }
+
+        // look for an empty segment - "::"
+        int emptyIndex = -1;
+        for (int i = 0; i < segments.length - 1; i++) {
+            if (segments[i].length() == 0) {
+                if (emptyIndex > 0) {
+                    return null; // more than one occurrence of "::", invalid address
+                } else if (emptyIndex != 0) { // don't rewrite skipIndex=0, when address starts with "::"
+                    emptyIndex = i;
+                }
+            }
+        }
+
+        boolean containsIPv4 = segments[segments.length - 1].contains(".");
+        int totalSegments = containsIPv4 ? 7 : 8; // if the last segment contains IPv4 notation ("::ffff:192.0.0.1"), the address only has 7 segments
+        if (emptyIndex == -1 && segments.length != totalSegments) {
+            return null; // no substitution but incorrect number of segments
+        }
+
+        int skipIndex;
+        int skippedSegments;
+        boolean isDefaultRoute = segments.length == 3
+                && segments[0].isEmpty() && segments[1].isEmpty() && segments[2].isEmpty(); // is address just "::"?
+        if (isDefaultRoute) {
+            skipIndex = 0;
+            skippedSegments = 8;
+        } else if (segments[0].isEmpty() || segments[segments.length - 1].isEmpty()) {
+            // "::" is at the beginning or end of the address
+            skipIndex = emptyIndex;
+            skippedSegments = totalSegments - segments.length + 2;
+        } else if (emptyIndex > -1) {
+            // "::" somewhere in the middle
+            skipIndex = emptyIndex;
+            skippedSegments = totalSegments - segments.length + 1;
+        } else {
+            // no substitution
+            skipIndex = 0;
+            skippedSegments = 0;
+        }
+
+        ByteBuffer bytes = ByteBuffer.allocate(16);
+
+        try {
+            // convert segments before "::"
+            for (int i = 0; i < skipIndex; i++) {
+                bytes.putShort(parseHexadecimal(segments[i]));
+            }
+            // fill "0" characters into expanded segments
+            for (int i = skipIndex; i < skipIndex + skippedSegments; i++) {
+                bytes.putShort((short) 0);
+            }
+            // convert segments after "::"
+            for (int i = skipIndex + skippedSegments; i < totalSegments; i++) {
+                int segmentIdx = segments.length - (totalSegments - i);
+                if (containsIPv4 && i == totalSegments - 1) {
+                    // we are at the last segment and it contains IPv4 address
+                    String[] ipV4Segments = segments[segmentIdx].split("\\.");
+                    if (ipV4Segments.length != 4) {
+                        return null; // incorrect number of segments in IPv4
+                    }
+                    for (int idxV4 = 0; idxV4 < 4; idxV4++) {
+                        bytes.put(parseDecimal(ipV4Segments[idxV4]));
+                    }
+                } else {
+                    bytes.putShort(parseHexadecimal(segments[segmentIdx]));
+                }
+            }
+
+            return bytes.array();
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private static byte parseDecimal(String number) {
+        int i = Integer.parseInt(number);
+        if (i > 255) {
+            throw new NumberFormatException();
+        }
+        return (byte) i;
+    }
+
+    private static short parseHexadecimal(String hexNumber) {
+        int i = Integer.parseInt(hexNumber, 16);
+        if (i > 0xffff) {
+            throw new NumberFormatException();
+        }
+        return (short) i;
     }
 
     private static String toOptimalStringV6(final byte[] bytes) {
