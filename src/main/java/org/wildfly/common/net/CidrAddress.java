@@ -182,6 +182,18 @@ public final class CidrAddress implements Serializable {
     }
 
     /**
+     * Determine if this CIDR address matches the given CIDR address.  This will be true only when the given CIDR
+     * block is wholly enclosed by this one.
+     *
+     * @param address the address to test
+     * @return {@code true} if the given block is enclosed by this one, {@code false} otherwise
+     */
+    public boolean matches(CidrAddress address) {
+        Assert.checkNotNullParam("address", address);
+        return netmaskBits <= address.netmaskBits && matches(address.cachedBytes);
+    }
+
+    /**
      * Get the network address.  The returned address has a resolved name consisting of the most compact valid string
      * representation of the network of this CIDR address.
      *
