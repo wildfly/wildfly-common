@@ -149,6 +149,17 @@ public final class CidrAddress implements Serializable {
     }
 
     /**
+     * Determine if this CIDR address matches the given address bytes.
+     *
+     * @param bytes the address bytes to test
+     * @return {@code true} if the address bytes match, {@code false} otherwise
+     */
+    public boolean matches(byte[] bytes) {
+        Assert.checkNotNullParam("address", bytes);
+        return cachedBytes.length == bytes.length && bitsMatch(cachedBytes, bytes, netmaskBits);
+    }
+
+    /**
      * Determine if this CIDR address matches the given address.
      *
      * @param address the address to test
