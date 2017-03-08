@@ -132,40 +132,40 @@ public final class CidrAddress implements Serializable {
     }
 
     /**
-     * Determine if the given address matches this CIDR address.
+     * Determine if this CIDR address matches the given address.
      *
      * @param address the address to test
      * @return {@code true} if the address matches, {@code false} otherwise
      */
-    public boolean isMatchedBy(InetAddress address) {
+    public boolean matches(InetAddress address) {
         Assert.checkNotNullParam("address", address);
         if (address instanceof Inet4Address) {
-            return isMatchedBy((Inet4Address) address);
+            return matches((Inet4Address) address);
         } else if (address instanceof Inet6Address) {
-            return isMatchedBy((Inet6Address) address);
+            return matches((Inet6Address) address);
         } else {
             throw Assert.unreachableCode();
         }
     }
 
     /**
-     * Determine if the given address matches this CIDR address.
+     * Determine if this CIDR address matches the given address.
      *
      * @param address the address to test
      * @return {@code true} if the address matches, {@code false} otherwise
      */
-    public boolean isMatchedBy(Inet4Address address) {
+    public boolean matches(Inet4Address address) {
         Assert.checkNotNullParam("address", address);
         return networkAddress instanceof Inet4Address && bitsMatch(cachedBytes, address.getAddress(), netmaskBits);
     }
 
     /**
-     * Determine if the given address matches this CIDR address.
+     * Determine if this CIDR address matches the given address.
      *
      * @param address the address to test
      * @return {@code true} if the address matches, {@code false} otherwise
      */
-    public boolean isMatchedBy(Inet6Address address) {
+    public boolean matches(Inet6Address address) {
         Assert.checkNotNullParam("address", address);
         return networkAddress instanceof Inet6Address && bitsMatch(cachedBytes, address.getAddress(), netmaskBits);
     }
