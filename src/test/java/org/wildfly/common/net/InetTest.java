@@ -56,7 +56,7 @@ public class InetTest {
     }
 
     @Test
-    public void testToAddressBytes() throws Exception {
+    public void testInet6AddressToBytes() throws Exception {
         checkAddressToBytes("::");
         checkAddressToBytes("::1");
         checkAddressToBytes("::7:8");
@@ -86,10 +86,32 @@ public class InetTest {
         assertNull(parseInet6AddressToBytes("::1.2.3.256"));
     }
 
+    @Test
+    public void testInet4AddressToBytes() throws UnknownHostException {
+        assertArrayEquals(bytes(1, 2, 3, 4), parseInet4AddressToBytes("1.2.3.4"));
+        assertArrayEquals(bytes(1, 0, 0, 10), parseInet4AddressToBytes("1.0.0.010")); // octal numbers not supported
+        assertArrayEquals(bytes(255, 255, 255, 255), parseInet4AddressToBytes("255.255.255.255"));
+
+        assertNull(parseInet4AddressToBytes(".1.1.1"));
+        assertNull(parseInet4AddressToBytes("1..1.1"));
+        assertNull(parseInet4AddressToBytes("1.1.1."));
+        assertNull(parseInet4AddressToBytes("1.1.1.1.1"));
+        assertNull(parseInet4AddressToBytes("1.1.1.256")); // higher than 256 numbers not supported
+        assertNull(parseInet4AddressToBytes("1.1.1.0256")); // octal numbers not supported
+        assertNull(parseInet4AddressToBytes("1.1.1.0xf")); // hexadecimal numbers not supported
+        assertNull(parseInet4AddressToBytes("1.1.1")); // short notation not supported
+        assertNull(parseInet4AddressToBytes("1.1"));
+        assertNull(parseInet4AddressToBytes("1"));
+    }
+
     private void checkAddressToBytes(String ipv6) throws UnknownHostException {
         byte[] bytes = parseInet6AddressToBytes(ipv6);
         assertNotNull(bytes);
         assertArrayEquals(InetAddress.getByName(ipv6).getAddress(), bytes);
+    }
+
+    private byte[] bytes(int s1, int s2, int s3, int s4) {
+        return new byte[] {(byte) s1, (byte) s2, (byte) s3, (byte) s4};
     }
 
     private byte[] bytes(int s1, int s2, int s3, int s4, int s5, int s6, int s7, int s8) {
