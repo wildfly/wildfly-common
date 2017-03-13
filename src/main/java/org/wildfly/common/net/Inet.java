@@ -248,6 +248,35 @@ public final class Inet {
     }
 
     /**
+     * Checks whether given String is a valid IPv4 address.
+     *
+     * @param address address textual representation
+     * @return {@code true} if {@code address} is a valid IPv4 address, {@code false} otherwise
+     */
+    public static boolean isInet4Address(String address) {
+        return parseInet4AddressToBytes(address) != null;
+    }
+
+    /**
+     * Parse an IPv4 address into an {@code Inet4Address} object.
+     *
+     * @param address the address to parse
+     * @return the parsed address, or {@code null} if the address is not valid
+     */
+    public static Inet4Address parseInet4Address(String address) {
+        final byte[] bytes = parseInet4AddressToBytes(address);
+        if (bytes == null) {
+            return null;
+        }
+        try {
+            return (Inet4Address) Inet4Address.getByAddress(address, bytes);
+        } catch (UnknownHostException e) {
+            // not possible
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /**
      * Converts IPv6 address from textual representation to bytes.
      * <p>
      * If given string doesn't represent valid IPv6 address, the method returns {@code null}.
@@ -365,9 +394,47 @@ public final class Inet {
         }
     }
 
+    /**
+     * Converts IPv4 address from textual representation to bytes.
+     * <p>
+     * If given string doesn't represent valid IPv4 address, the method returns {@code null}.
+     * <p>
+     * This only supports decimal notation.
+     *
+     * @param address address textual representation
+     * @return byte array representing the address, or {@code null} if the address is not valid
+     */
+    public static byte[] parseInet4AddressToBytes(String address) {
+        String[] segments = address.split("\\.", 5);
+        if (segments.length != 4) {
+            return null; // require 4 segments
+        }
+        // validate segments
+        for (int i = 0; i < segments.length; i++) {
+            if (segments[i].length() < 1) {
+                return null; // empty segment
+            }
+            for (int cidx = 0; cidx < segments[i].length(); cidx++) {
+                if (Character.digit(segments[i].charAt(cidx), 10) < 0) {
+                    return null; // not a digit
+                }
+            }
+        }
+
+        byte[] bytes = new byte[4];
+        try {
+            for (int i = 0; i < segments.length; i++) {
+                bytes[i] = parseDecimal(segments[i]);
+            }
+            return bytes;
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
     private static byte parseDecimal(String number) {
         int i = Integer.parseInt(number);
-        if (i > 255) {
+        if (i < 0 || i > 255) {
             throw new NumberFormatException();
         }
         return (byte) i;
