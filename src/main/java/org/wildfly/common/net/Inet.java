@@ -316,6 +316,34 @@ public final class Inet {
     }
 
     /**
+     * Parse a CIDR address into a {@code CidrAddress} object.
+     *
+     * @param address the address to parse
+     * @return the parsed address, or {@code null} if the address is not valid
+     */
+    public static CidrAddress parseCidrAddress(String address) {
+        final int idx = address.indexOf('/');
+        if (idx == -1) {
+            return null;
+        }
+        int mask;
+        try {
+            mask = Integer.parseInt(address.substring(idx + 1));
+        } catch (NumberFormatException e) {
+            return null;
+        }
+        final byte[] addressBytes = parseInetAddressToBytes(address.substring(0, idx));
+        if (addressBytes == null) {
+            return null;
+        }
+        try {
+            return CidrAddress.create(addressBytes, mask, false);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    /**
      * Converts IPv6 address from textual representation to bytes.
      * <p>
      * If given string doesn't represent valid IPv6 address, the method returns {@code null}.
