@@ -226,45 +226,6 @@ public final class Inet {
     }
 
     /**
-     * Checks whether given String is a valid IP address.
-     *
-     * @param address address textual representation
-     * @return {@code true} if {@code address} is a valid IP address, {@code false} otherwise
-     */
-    public static boolean isInetAddress(String address) {
-        return isInet4Address(address) || isInet6Address(address);
-    }
-
-    /**
-     * Parse an IP address into an {@code InetAddress} object.
-     *
-     * @param address the address to parse
-     * @return the parsed address, or {@code null} if the address is not valid
-     */
-    public static InetAddress parseInetAddress(String address) {
-        // not a great heuristic but good enough
-        if (address.charAt(0) == '[' || address.indexOf(':') != -1) {
-            return parseInet6Address(address);
-        } else {
-            return parseInet4Address(address);
-        }
-    }
-
-    /**
-     * Converts IP address from textual representation to bytes.
-     * <p>
-     * If given string doesn't represent valid IP address, the method returns {@code null}.
-     *
-     * @param address address textual representation
-     * @return byte array representing the address, or {@code null} if the address is not valid
-     */
-    public static byte[] parseInetAddressToBytes(String address) {
-        byte[] res = parseInet4AddressToBytes(address);
-        if (res == null) res = parseInet6AddressToBytes(address);
-        return res;
-    }
-
-    /**
      * Checks whether given String is a valid IPv6 address.
      *
      * @param address address textual representation
