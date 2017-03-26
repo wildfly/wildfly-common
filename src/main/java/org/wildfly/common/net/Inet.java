@@ -301,6 +301,21 @@ public final class Inet {
     }
 
     /**
+     * Parse an IP address into an {@code InetAddress} object.
+     *
+     * @param address the address to parse
+     * @return the parsed address, or {@code null} if the address is not valid
+     */
+    public static InetAddress parseInetAddress(String address) {
+        // simple heuristic
+        if (address.indexOf(':') != -1) {
+            return parseInet6Address(address);
+        } else {
+            return parseInet4Address(address);
+        }
+    }
+
+    /**
      * Converts IPv6 address from textual representation to bytes.
      * <p>
      * If given string doesn't represent valid IPv6 address, the method returns {@code null}.
@@ -458,6 +473,23 @@ public final class Inet {
             return bytes;
         } catch (NumberFormatException e) {
             return null;
+        }
+    }
+
+    /**
+     * Converts an IP address from textual representation to bytes.
+     * <p>
+     * If given string doesn't represent valid IP address, the method returns {@code null}.
+     *
+     * @param address address textual representation
+     * @return byte array representing the address, or {@code null} if the address is not valid
+     */
+    public static byte[] parseInetAddressToBytes(String address) {
+        // simple heuristic
+        if (address.indexOf(':') != -1) {
+            return parseInet6AddressToBytes(address);
+        } else {
+            return parseInet4AddressToBytes(address);
         }
     }
 
