@@ -18,6 +18,9 @@
 
 package org.wildfly.common.net;
 
+import static java.lang.Integer.signum;
+import static java.lang.Math.min;
+
 import java.io.Serializable;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -34,7 +37,7 @@ import org.wildfly.common.math.HashMath;
  *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  */
-public final class CidrAddress implements Serializable {
+public final class CidrAddress implements Serializable, Comparable<CidrAddress> {
     private static final long serialVersionUID = - 6548529324373774149L;
 
     /**
@@ -54,7 +57,7 @@ public final class CidrAddress implements Serializable {
     private String toString;
     private int hashCode;
 
-    CidrAddress(final InetAddress networkAddress, final int netmaskBits) {
+    private CidrAddress(final InetAddress networkAddress, final int netmaskBits) {
         this.networkAddress = networkAddress;
         cachedBytes = networkAddress.getAddress();
         this.netmaskBits = netmaskBits;
@@ -70,6 +73,7 @@ public final class CidrAddress implements Serializable {
     public static CidrAddress create(InetAddress networkAddress, int netmaskBits) {
         Assert.checkNotNullParam("networkAddress", networkAddress);
         Assert.checkMinimumParameter("netmaskBits", 0, netmaskBits);
+        int scopeId = Inet.getScopeId(networkAddress);
         if (networkAddress instanceof Inet4Address) {
             Assert.checkMaximumParameter("netmaskBits", 32, netmaskBits);
             if (netmaskBits == 0) {
@@ -77,7 +81,7 @@ public final class CidrAddress implements Serializable {
             }
         } else if (networkAddress instanceof Inet6Address) {
             Assert.checkMaximumParameter("netmaskBits", 128, netmaskBits);
-            if (netmaskBits == 0) {
+            if (netmaskBits == 0 && scopeId == 0) {
                 return INET6_ANY_CIDR;
             }
         } else {
@@ -87,7 +91,11 @@ public final class CidrAddress implements Serializable {
         maskBits0(bytes, netmaskBits);
         String name = Inet.toOptimalString(bytes);
         try {
-            return new CidrAddress(InetAddress.getByAddress(name, bytes), netmaskBits);
+            if (bytes.length == 4) {
+                return new CidrAddress(InetAddress.getByAddress(name, bytes), netmaskBits);
+            } else {
+                return new CidrAddress(Inet6Address.getByAddress(name, bytes, scopeId), netmaskBits);
+            }
         } catch (UnknownHostException e) {
             throw Assert.unreachableCode();
         }
@@ -155,8 +163,19 @@ public final class CidrAddress implements Serializable {
      * @return {@code true} if the address bytes match, {@code false} otherwise
      */
     public boolean matches(byte[] bytes) {
-        Assert.checkNotNullParam("address", bytes);
-        return cachedBytes.length == bytes.length && bitsMatch(cachedBytes, bytes, netmaskBits);
+        return matches(bytes, 0);
+    }
+
+    /**
+     * Determine if this CIDR address matches the given address bytes.
+     *
+     * @param bytes the address bytes to test
+     * @param scopeId the scope ID, or 0 to match no scope
+     * @return {@code true} if the address bytes match, {@code false} otherwise
+     */
+    public boolean matches(byte[] bytes, int scopeId) {
+        Assert.checkNotNullParam("bytes", bytes);
+        return cachedBytes.length == bytes.length && (getScopeId() == 0 || getScopeId() == scopeId) && bitsMatch(cachedBytes, bytes, netmaskBits);
     }
 
     /**
@@ -178,7 +197,8 @@ public final class CidrAddress implements Serializable {
      */
     public boolean matches(Inet6Address address) {
         Assert.checkNotNullParam("address", address);
-        return networkAddress instanceof Inet6Address && bitsMatch(cachedBytes, address.getAddress(), netmaskBits);
+        return networkAddress instanceof Inet6Address && bitsMatch(cachedBytes, address.getAddress(), netmaskBits)
+            && (getScopeId() == 0 || getScopeId() == address.getScopeId());
     }
 
     /**
@@ -190,7 +210,8 @@ public final class CidrAddress implements Serializable {
      */
     public boolean matches(CidrAddress address) {
         Assert.checkNotNullParam("address", address);
-        return netmaskBits <= address.netmaskBits && matches(address.cachedBytes);
+        return netmaskBits <= address.netmaskBits && matches(address.cachedBytes)
+            && (getScopeId() == 0 || getScopeId() == address.getScopeId());
     }
 
     /**
@@ -246,6 +267,54 @@ public final class CidrAddress implements Serializable {
         return netmaskBits;
     }
 
+    /**
+     * Get the match address scope ID (if it is an IPv6 address).
+     *
+     * @return the scope ID, or 0 if there is none or the address is an IPv4 address
+     */
+    public int getScopeId() {
+        return Inet.getScopeId(getNetworkAddress());
+    }
+
+    public int compareTo(final CidrAddress other) {
+        Assert.checkNotNullParam("other", other);
+        if (this == other) return 0;
+        return compareAddressBytesTo(other.cachedBytes, other.netmaskBits, other.getScopeId());
+    }
+
+    public int compareAddressBytesTo(final byte[] otherBytes, final int otherNetmaskBits, final int scopeId) {
+        Assert.checkNotNullParam("bytes", otherBytes);
+        final int otherLength = otherBytes.length;
+        if (otherLength != 4 && otherLength != 16) {
+            throw CommonMessages.msg.invalidAddressBytes(otherLength);
+        }
+        // IPv4 before IPv6
+        final byte[] cachedBytes = this.cachedBytes;
+        int res = signum(cachedBytes.length - otherLength);
+        if (res != 0) return res;
+        res = signum(scopeId - getScopeId());
+        if (res != 0) return res;
+        // sorted numerically with long matches coming later
+        final int netmaskBits = this.netmaskBits;
+        int commonPrefix = min(netmaskBits, otherNetmaskBits);
+        // compare byte-wise as far as we can
+        int i = 0;
+        while (commonPrefix >= 8) {
+            res = signum((cachedBytes[i] & 0xff) - (otherBytes[i] & 0xff));
+            if (res != 0) return res;
+            i++;
+            commonPrefix -= 8;
+        }
+        while (commonPrefix > 0) {
+            final int bit = 1 << commonPrefix;
+            res = signum((cachedBytes[i] & bit) - (otherBytes[i] & bit));
+            if (res != 0) return res;
+            commonPrefix--;
+        }
+        // common prefix is a match; now the shortest mask wins
+        return signum(netmaskBits - otherNetmaskBits);
+    }
+
     public boolean equals(final Object obj) {
         return obj instanceof CidrAddress && equals((CidrAddress) obj);
     }
@@ -269,7 +338,12 @@ public final class CidrAddress implements Serializable {
     public String toString() {
         final String toString = this.toString;
         if (toString == null) {
-            return this.toString = String.format("%s/%d", Inet.toOptimalString(cachedBytes), Integer.valueOf(netmaskBits));
+            final int scopeId = getScopeId();
+            if (scopeId == 0) {
+                return this.toString = String.format("%s/%d", Inet.toOptimalString(cachedBytes), Integer.valueOf(netmaskBits));
+            } else {
+                return this.toString = String.format("%s%%%d/%d", Inet.toOptimalString(cachedBytes), Integer.valueOf(scopeId), Integer.valueOf(netmaskBits));
+            }
         }
         return toString;
     }

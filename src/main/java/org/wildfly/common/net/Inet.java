@@ -18,12 +18,19 @@
 
 package org.wildfly.common.net;
 
+import static java.security.AccessController.doPrivileged;
+
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.security.PrivilegedAction;
+import java.util.Enumeration;
+import java.util.regex.Pattern;
 
 import org.wildfly.common.Assert;
 import org.wildfly.common._private.CommonMessages;
@@ -231,20 +238,37 @@ public final class Inet {
     /**
      * Parse an IPv6 address into an {@code Inet6Address} object.
      *
-     * @param address the address to parse
+     * @param string the address to parse
      * @return the parsed address, or {@code null} if the address is not valid
      */
-    public static Inet6Address parseInet6Address(String address) {
-        final byte[] bytes = parseInet6AddressToBytes(address);
+    public static Inet6Address parseInet6Address(String string) {
+        final byte[] bytes = parseInet6AddressToBytes(string);
         if (bytes == null) {
             return null;
         }
+        int scopeId = 0;
+        Inet6Address address;
         try {
-            return Inet6Address.getByAddress(address, bytes, 0);
+            address = Inet6Address.getByAddress(string, bytes, 0);
         } catch (UnknownHostException e) {
             // not possible
             throw new IllegalStateException(e);
         }
+        final int pctIdx = string.indexOf('%');
+        if (pctIdx != -1) {
+            scopeId = getScopeId(string.substring(pctIdx + 1), address);
+            if (scopeId == 0) {
+                // address not valid after all...
+                return null;
+            }
+            try {
+                address = Inet6Address.getByAddress(string, bytes, scopeId);
+            } catch (UnknownHostException e) {
+                // not possible
+                throw new IllegalStateException(e);
+            }
+        }
+        return address;
     }
 
     /**
@@ -292,6 +316,11 @@ public final class Inet {
         // remove brackets if present
         if (address.startsWith("[") && address.endsWith("]")) {
             address = address.substring(1, address.length() - 1);
+        }
+
+        final int pctIdx = address.indexOf('%');
+        if (pctIdx != -1) {
+            address = address.substring(0, pctIdx);
         }
 
         String[] segments = address.split(":", 10);
@@ -430,6 +459,90 @@ public final class Inet {
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+
+    /**
+     * Get the scope ID of the given address (if it is an IPv6 address).
+     *
+     * @return the scope ID, or 0 if there is none or the address is an IPv4 address
+     */
+    public static int getScopeId(InetAddress address) {
+        return address instanceof Inet6Address ? ((Inet6Address) address).getScopeId() : 0;
+    }
+
+    private static final Pattern NUMERIC = Pattern.compile("\\d+");
+
+    /**
+     * Attempt to get the scope ID of the given string.  If the string is numeric then the number is parsed
+     * and returned as-is.  If the scope is a string, then a search for the matching network interface will occur.
+     *
+     * @param scopeName the scope number or name as a string (must not be {@code null})
+     * @return the scope ID, or 0 if no matching scope could be found
+     */
+    public static int getScopeId(String scopeName) {
+        return getScopeId(scopeName, null);
+    }
+
+    /**
+     * Attempt to get the scope ID of the given string.  If the string is numeric then the number is parsed
+     * and returned as-is.  If the scope is a string, then a search for the matching network interface will occur.
+     *
+     * @param scopeName the scope number or name as a string (must not be {@code null})
+     * @param compareWith the address to compare with, to ensure that the wrong local scope is not selected (may be {@code null})
+     * @return the scope ID, or 0 if no matching scope could be found
+     */
+    public static int getScopeId(String scopeName, InetAddress compareWith) {
+        Assert.checkNotNullParam("scopeName", scopeName);
+        if (NUMERIC.matcher(scopeName).matches()) try {
+            return Integer.parseInt(scopeName);
+        } catch (NumberFormatException ignored) {
+            return 0;
+        }
+        final NetworkInterface ni = findInterfaceWithScopeId(scopeName);
+        if (ni == null) return 0;
+        return getScopeId(ni, compareWith);
+    }
+
+    public static NetworkInterface findInterfaceWithScopeId(String scopeName) {
+        final Enumeration<NetworkInterface> enumeration;
+        try {
+            enumeration = NetworkInterface.getNetworkInterfaces();
+        } catch (SocketException ignored) {
+            return null;
+        }
+        while (enumeration.hasMoreElements()) {
+            final NetworkInterface net = enumeration.nextElement();
+            if (net.getName().equals(scopeName)) {
+                return net;
+            }
+        }
+        return null;
+    }
+
+    public static int getScopeId(NetworkInterface networkInterface) {
+        return getScopeId(networkInterface, null);
+    }
+
+    public static int getScopeId(NetworkInterface networkInterface, InetAddress compareWith) {
+        Assert.checkNotNullParam("networkInterface", networkInterface);
+        Inet6Address cw6 = compareWith instanceof Inet6Address ? (Inet6Address) compareWith : null;
+        Inet6Address address = doPrivileged((PrivilegedAction<Inet6Address>) () -> {
+            final Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
+            while (addresses.hasMoreElements()) {
+                final InetAddress a = addresses.nextElement();
+                if (a instanceof Inet6Address) {
+                    final Inet6Address a6 = (Inet6Address) a;
+                    if (cw6 == null ||
+                        a6.isLinkLocalAddress() == cw6.isLinkLocalAddress() &&
+                        a6.isSiteLocalAddress() == cw6.isSiteLocalAddress()
+                    ) {
+                        return a6;
+                    }
+                }
+            }
+            return null;
+        });
+        return address == null ? 0 : address.getScopeId();
     }
 
     private static byte parseDecimal(String number) {
