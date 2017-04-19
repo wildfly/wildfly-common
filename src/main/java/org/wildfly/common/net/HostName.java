@@ -25,6 +25,8 @@ import java.net.UnknownHostException;
 import java.security.PrivilegedAction;
 import java.util.regex.Pattern;
 
+import org.wildfly.common.Assert;
+
 /**
  * Methods for getting the system host name.  The host name is detected from the environment, but may be overridden by
  * use of the {@code jboss.host.name} and/or {@code jboss.qualified.host.name} system properties.
@@ -33,14 +35,17 @@ import java.util.regex.Pattern;
  */
 public final class HostName {
 
-    private static final String hostName;
-    private static final String qualifiedHostName;
+    private static final Object lock = new Object();
+    private static volatile String hostName;
+    private static volatile String qualifiedHostName;
+    private static volatile String nodeName;
 
     static {
         String[] names = doPrivileged((PrivilegedAction<String[]>) () -> {
             // allow host name to be overridden
             String qualifiedHostName = System.getProperty("jboss.qualified.host.name");
             String providedHostName = System.getProperty("jboss.host.name");
+            String providedNodeName = System.getProperty("jboss.node.name");
             if (qualifiedHostName == null) {
                 // if host name is specified, don't pick a qualified host name that isn't related to it
                 qualifiedHostName = providedHostName;
@@ -75,13 +80,21 @@ public final class HostName {
                 final int idx = qualifiedHostName.indexOf('.');
                 providedHostName  = idx == -1 ? qualifiedHostName : qualifiedHostName.substring(0, idx);
             }
+            if (providedNodeName == null) {
+                providedNodeName = providedHostName;
+            }
             return new String[] {
                 providedHostName,
-                qualifiedHostName
+                qualifiedHostName,
+                providedNodeName
             };
         });
         hostName = names[0];
         qualifiedHostName = names[1];
+        nodeName = names[2];
+    }
+
+    private HostName() {
     }
 
     static InetAddress getLocalHost() throws UnknownHostException {
@@ -110,5 +123,40 @@ public final class HostName {
      */
     public static String getQualifiedHostName() {
         return qualifiedHostName;
+    }
+
+    /**
+     * Get the node name.
+     *
+     * @return the node name
+     */
+    public static String getNodeName() {
+        return nodeName;
+    }
+
+    /**
+     * Set the host name.  The qualified host name is set directly from the given value; the unqualified host name
+     * is then re-derived from that value.  The node name is not changed by this method.
+     *
+     * @param qualifiedHostName the host name
+     */
+    public static void setQualifiedHostName(final String qualifiedHostName) {
+        Assert.checkNotNullParam("qualifiedHostName", qualifiedHostName);
+        synchronized (lock) {
+            HostName.qualifiedHostName = qualifiedHostName;
+            // Use the host part of the qualified host name
+            final int idx = qualifiedHostName.indexOf('.');
+            HostName.hostName = idx == -1 ? qualifiedHostName : qualifiedHostName.substring(0, idx);
+        }
+    }
+
+    /**
+     * Set the node name.
+     *
+     * @param nodeName the node name
+     */
+    public static void setNodeName(final String nodeName) {
+        Assert.checkNotNullParam("nodeName", nodeName);
+        HostName.nodeName = nodeName;
     }
 }
