@@ -25,6 +25,8 @@ import java.net.UnknownHostException;
 import java.security.PrivilegedAction;
 import java.util.regex.Pattern;
 
+import org.wildfly.common.Assert;
+
 /**
  * Methods for getting the system host name.  The host name is detected from the environment, but may be overridden by
  * use of the {@code jboss.host.name} and/or {@code jboss.qualified.host.name} system properties.
@@ -33,8 +35,9 @@ import java.util.regex.Pattern;
  */
 public final class HostName {
 
-    private static final String hostName;
-    private static final String qualifiedHostName;
+    private static final Object lock = new Object();
+    private static volatile String hostName;
+    private static volatile String qualifiedHostName;
 
     static {
         String[] names = doPrivileged((PrivilegedAction<String[]>) () -> {
@@ -84,6 +87,9 @@ public final class HostName {
         qualifiedHostName = names[1];
     }
 
+    private HostName() {
+    }
+
     static InetAddress getLocalHost() throws UnknownHostException {
         InetAddress addr;
         try {
@@ -110,5 +116,21 @@ public final class HostName {
      */
     public static String getQualifiedHostName() {
         return qualifiedHostName;
+    }
+
+    /**
+     * Set the host name.  The qualified host name is set directly from the given value; the unqualified host name
+     * is then re-derived from that value.
+     *
+     * @param qualifiedHostName the host name
+     */
+    public static void setQualifiedHostName(final String qualifiedHostName) {
+        Assert.checkNotNullParam("qualifiedHostName", qualifiedHostName);
+        synchronized (lock) {
+            HostName.qualifiedHostName = qualifiedHostName;
+            // Use the host part of the qualified host name
+            final int idx = qualifiedHostName.indexOf('.');
+            HostName.hostName = idx == -1 ? qualifiedHostName : qualifiedHostName.substring(0, idx);
+        }
     }
 }
