@@ -38,12 +38,14 @@ public final class HostName {
     private static final Object lock = new Object();
     private static volatile String hostName;
     private static volatile String qualifiedHostName;
+    private static volatile String nodeName;
 
     static {
         String[] names = doPrivileged((PrivilegedAction<String[]>) () -> {
             // allow host name to be overridden
             String qualifiedHostName = System.getProperty("jboss.qualified.host.name");
             String providedHostName = System.getProperty("jboss.host.name");
+            String providedNodeName = System.getProperty("jboss.node.name");
             if (qualifiedHostName == null) {
                 // if host name is specified, don't pick a qualified host name that isn't related to it
                 qualifiedHostName = providedHostName;
@@ -78,13 +80,18 @@ public final class HostName {
                 final int idx = qualifiedHostName.indexOf('.');
                 providedHostName  = idx == -1 ? qualifiedHostName : qualifiedHostName.substring(0, idx);
             }
+            if (providedNodeName == null) {
+                providedNodeName = providedHostName;
+            }
             return new String[] {
                 providedHostName,
-                qualifiedHostName
+                qualifiedHostName,
+                providedNodeName
             };
         });
         hostName = names[0];
         qualifiedHostName = names[1];
+        nodeName = names[2];
     }
 
     private HostName() {
@@ -119,8 +126,17 @@ public final class HostName {
     }
 
     /**
+     * Get the node name.
+     *
+     * @return the node name
+     */
+    public static String getNodeName() {
+        return nodeName;
+    }
+
+    /**
      * Set the host name.  The qualified host name is set directly from the given value; the unqualified host name
-     * is then re-derived from that value.
+     * is then re-derived from that value.  The node name is not changed by this method.
      *
      * @param qualifiedHostName the host name
      */
@@ -132,5 +148,15 @@ public final class HostName {
             final int idx = qualifiedHostName.indexOf('.');
             HostName.hostName = idx == -1 ? qualifiedHostName : qualifiedHostName.substring(0, idx);
         }
+    }
+
+    /**
+     * Set the node name.
+     *
+     * @param nodeName the node name
+     */
+    public static void setNodeName(final String nodeName) {
+        Assert.checkNotNullParam("nodeName", nodeName);
+        HostName.nodeName = nodeName;
     }
 }
