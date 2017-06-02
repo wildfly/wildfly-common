@@ -599,6 +599,11 @@ public final class Expression {
                                     node = LiteralNode.FORM_FEED;
                                     break;
                                 }
+                                case '\\': {
+                                    // TP 45
+                                    node = LiteralNode.BACKSLASH;
+                                    break;
+                                }
                                 default: {
                                     if (flags.contains(Flag.LENIENT_SYNTAX)) {
                                         // TP 40

@@ -36,6 +36,7 @@ class LiteralNode extends Node {
     static final LiteralNode TAB = new LiteralNode("\t");
     static final LiteralNode BACKSPACE = new LiteralNode("\b");
     static final LiteralNode FORM_FEED = new LiteralNode("\f");
+    static final LiteralNode BACKSLASH = new LiteralNode("\\");
 
     private final String literalValue;
     private final int start;

@@ -530,4 +530,12 @@ public class ExpressionTestCase {
             fail("unexpected expansion");
         }));
     }
+
+    @Test
+    public void testPoint45() throws Exception {
+        final Expression expression = Expression.compile("W:\\\\workspace\\\\some-path\\\\xxxxyyyy", Expression.Flag.ESCAPES);
+        assertEquals("W:\\workspace\\some-path\\xxxxyyyy", expression.evaluate((c, b) -> {
+            fail("unexpected expansion");
+        }));
+    }
 }
