@@ -21,7 +21,11 @@ package org.wildfly.common.net;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.wildfly.common.Assert;
@@ -31,8 +35,9 @@ import org.wildfly.common.Assert;
  *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  */
-public final class CidrAddressTable<T> {
+public final class CidrAddressTable<T> implements Iterable<CidrAddressTable.Mapping<T>> {
 
+    @SuppressWarnings("rawtypes")
     private static final Mapping[] NO_MAPPINGS = new Mapping[0];
 
     private final AtomicReference<Mapping<T>[]> mappingsRef;
@@ -189,6 +194,27 @@ public final class CidrAddressTable<T> {
         return new CidrAddressTable<>(mappingsRef.get());
     }
 
+    public Iterator<Mapping<T>> iterator() {
+        final Mapping<T>[] mappings = mappingsRef.get();
+        return new Iterator<Mapping<T>>() {
+            int idx;
+
+            public boolean hasNext() {
+                return idx < mappings.length;
+            }
+
+            public Mapping<T> next() {
+                if (! hasNext()) throw new NoSuchElementException();
+                return mappings[idx++];
+            }
+        };
+    }
+
+    public Spliterator<Mapping<T>> spliterator() {
+        final Mapping<T>[] mappings = mappingsRef.get();
+        return Spliterators.spliterator(mappings, Spliterator.IMMUTABLE | Spliterator.ORDERED);
+    }
+
     public String toString() {
         StringBuilder b = new StringBuilder();
         final Mapping<T>[] mappings = mappingsRef.get();
@@ -255,7 +281,12 @@ public final class CidrAddressTable<T> {
         return null;
     }
 
-    static final class Mapping<T> {
+    /**
+     * A single mapping in the table.
+     *
+     * @param <T> the value type
+     */
+    public static final class Mapping<T> {
         final CidrAddress range;
         final T value;
         final Mapping<T> parent;
@@ -268,6 +299,33 @@ public final class CidrAddressTable<T> {
 
         Mapping<T> withNewParent(Mapping<T> newParent) {
             return new Mapping<T>(range, value, newParent);
+        }
+
+        /**
+         * Get the address range of this entry.
+         *
+         * @return the address range of this entry (not {@code null})
+         */
+        public CidrAddress getRange() {
+            return range;
+        }
+
+        /**
+         * Get the stored value of this entry.
+         *
+         * @return the stored value of this entry
+         */
+        public T getValue() {
+            return value;
+        }
+
+        /**
+         * Get the parent of this entry, if any.
+         *
+         * @return the parent of this entry, or {@code null} if there is no parent
+         */
+        public Mapping<T> getParent() {
+            return parent;
         }
     }
 }
