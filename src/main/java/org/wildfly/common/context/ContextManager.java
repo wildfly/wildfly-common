@@ -280,6 +280,11 @@ public final class ContextManager<C extends Contextual<C>> implements Supplier<C
         final State<C> state = stateRef.get();
         C c = state.current;
         if (c != null) return c;
+        Supplier<C> supplier = state.defaultSupplier;
+        if (supplier != null) {
+            c = supplier.get();
+            if (c != null) return c;
+        }
         final Thread currentThread = Thread.currentThread();
         final SecurityManager sm = System.getSecurityManager();
         ClassLoader classLoader;
@@ -288,12 +293,7 @@ public final class ContextManager<C extends Contextual<C>> implements Supplier<C
         } else {
             classLoader = currentThread.getContextClassLoader();
         }
-        Supplier<C> supplier = perClassLoaderDefault.get(classLoader);
-        if (supplier != null) {
-            c = supplier.get();
-            if (c != null) return c;
-        }
-        supplier = state.defaultSupplier;
+        supplier = perClassLoaderDefault.get(classLoader);
         if (supplier != null) {
             c = supplier.get();
             if (c != null) return c;
