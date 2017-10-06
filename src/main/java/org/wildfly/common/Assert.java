@@ -147,6 +147,32 @@ public final class Assert {
     }
 
     /**
+     * Check that the named parameter is greater than or equal to {@code min}.
+     *
+     * @param name the parameter name
+     * @param min the minimum value
+     * @param actual the actual parameter value
+     * @throws IllegalArgumentException if the actual value is less than the minimum value
+     */
+    public static void checkMinimumParameter(String name, float min, float actual) throws IllegalArgumentException {
+        checkNotNullParamChecked("name", name);
+        if (actual < min) throw CommonMessages.msg.paramLessThan(name, min);
+    }
+
+    /**
+     * Check that the named parameter is greater than or equal to {@code min}.
+     *
+     * @param name the parameter name
+     * @param min the minimum value
+     * @param actual the actual parameter value
+     * @throws IllegalArgumentException if the actual value is less than the minimum value
+     */
+    public static void checkMinimumParameter(String name, double min, double actual) throws IllegalArgumentException {
+        checkNotNullParamChecked("name", name);
+        if (actual < min) throw CommonMessages.msg.paramLessThan(name, min);
+    }
+
+    /**
      * Check that the named parameter is less than or equal to {@code max}.
      *
      * @param name the parameter name
@@ -168,6 +194,32 @@ public final class Assert {
      * @throws IllegalArgumentException if the actual value is greater than the minimum value
      */
     public static void checkMaximumParameter(String name, long max, long actual) throws IllegalArgumentException {
+        checkNotNullParamChecked("name", name);
+        if (actual > max) throw CommonMessages.msg.paramGreaterThan(name, max);
+    }
+
+    /**
+     * Check that the named parameter is less than or equal to {@code max}.
+     *
+     * @param name the parameter name
+     * @param max the maximum value
+     * @param actual the actual parameter value
+     * @throws IllegalArgumentException if the actual value is greater than the minimum value
+     */
+    public static void checkMaximumParameter(String name, float max, float actual) throws IllegalArgumentException {
+        checkNotNullParamChecked("name", name);
+        if (actual > max) throw CommonMessages.msg.paramGreaterThan(name, max);
+    }
+
+    /**
+     * Check that the named parameter is less than or equal to {@code max}.
+     *
+     * @param name the parameter name
+     * @param max the maximum value
+     * @param actual the actual parameter value
+     * @throws IllegalArgumentException if the actual value is greater than the minimum value
+     */
+    public static void checkMaximumParameter(String name, double max, double actual) throws IllegalArgumentException {
         checkNotNullParamChecked("name", name);
         if (actual > max) throw CommonMessages.msg.paramGreaterThan(name, max);
     }

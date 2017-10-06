@@ -42,8 +42,12 @@ public interface CommonMessages {
     @Message(id = 1, value = "Parameter '%s' must not be less than %d")
     IllegalArgumentException paramLessThan(String name, long min);
 
+    IllegalArgumentException paramLessThan(String name, double min);
+
     @Message(id = 2, value = "Parameter '%s' must not be greater than than %d")
     IllegalArgumentException paramGreaterThan(String name, long max);
+
+    IllegalArgumentException paramGreaterThan(String name, double max);
 
     @Message(id = 3, value = "Given offset of %d is greater than array length of %d")
     ArrayIndexOutOfBoundsException arrayOffsetGreaterThanLength(int offs, int arrayLength);
