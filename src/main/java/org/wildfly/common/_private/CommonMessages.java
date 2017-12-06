@@ -26,6 +26,7 @@ import org.jboss.logging.Messages;
 import org.jboss.logging.annotations.Cause;
 import org.jboss.logging.annotations.Message;
 import org.jboss.logging.annotations.MessageBundle;
+import org.wildfly.common.codec.DecodeException;
 
 /**
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
@@ -113,6 +114,38 @@ public interface CommonMessages {
 
     @Message(value = "Remote exception %s")
     String remoteException(String exceptionClassName);
+
+    // bytes package
+
+    @Message(id = 500, value = "Unexpected padding")
+    DecodeException unexpectedPadding();
+
+    @Message(id = 501, value = "Expected padding")
+    DecodeException expectedPadding();
+
+    @Message(id = 502, value = "Incomplete decode")
+    DecodeException incompleteDecode();
+
+    @Message(id = 503, value = "Expected %d padding characters")
+    DecodeException expectedPaddingCharacters(int numExpected);
+
+    @Message(id = 504, value = "Invalid base 32 character")
+    DecodeException invalidBase32Character();
+
+    @Message(id = 505, value = "Expected an even number of hex characters")
+    DecodeException expectedEvenNumberOfHexCharacters();
+
+    @Message(id = 506, value = "Invalid hex character")
+    DecodeException invalidHexCharacter();
+
+    @Message(id = 507, value = "Expected two padding characters")
+    DecodeException expectedTwoPaddingCharacters();
+
+    @Message(id = 508, value = "Invalid base 64 character")
+    DecodeException invalidBase64Character();
+
+    @Message(id = 509, value = "Byte string builder is too large to grow")
+    IllegalStateException tooLarge();
 
     // assertion errors
 
