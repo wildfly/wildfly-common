@@ -19,6 +19,7 @@
 package org.wildfly.common;
 
 import java.util.Collection;
+import java.util.Map;
 
 import org.wildfly.common._private.CommonMessages;
 import org.wildfly.common.annotation.NotNull;
@@ -117,6 +118,150 @@ public final class Assert {
         checkNotNullParamChecked("name", name);
         checkNotNullParamChecked("value", value);
         if (value.isEmpty()) throw CommonMessages.msg.emptyParam(name);
+        return value;
+    }
+
+    /**
+     * Check that the named parameter is not empty.  Use a standard exception message if it is.
+     *
+     * @param name the parameter name
+     * @param value the parameter value
+     * @return the value that was passed in
+     * @throws IllegalArgumentException if the value is empty
+     */
+    @NotNull
+    public static <K, V, T extends Map<K, V>> T checkNotEmptyParam(String name, T value) {
+        checkNotNullParamChecked("name", name);
+        checkNotNullParamChecked("value", value);
+        if (value.isEmpty()) throw CommonMessages.msg.emptyParam(name);
+        return value;
+    }
+
+    /**
+     * Check that the named parameter is not empty.  Use a standard exception message if it is.
+     *
+     * @param name the parameter name
+     * @param value the parameter value
+     * @return the value that was passed in
+     * @throws IllegalArgumentException if the value is empty
+     */
+    @NotNull
+    public static <T> T[] checkNotEmptyParam(String name, T[] value) {
+        checkNotNullParamChecked("name", name);
+        checkNotNullParamChecked("value", value);
+        if (value.length == 0) throw CommonMessages.msg.emptyParam(name);
+        return value;
+    }
+
+    /**
+     * Check that the named parameter is not empty.  Use a standard exception message if it is.
+     *
+     * @param name the parameter name
+     * @param value the parameter value
+     * @return the value that was passed in
+     * @throws IllegalArgumentException if the value is empty
+     */
+    @NotNull
+    public static boolean[] checkNotEmptyParam(String name, boolean[] value) {
+        checkNotNullParamChecked("name", name);
+        checkNotNullParamChecked("value", value);
+        if (value.length == 0) throw CommonMessages.msg.emptyParam(name);
+        return value;
+    }
+
+    /**
+     * Check that the named parameter is not empty.  Use a standard exception message if it is.
+     *
+     * @param name the parameter name
+     * @param value the parameter value
+     * @return the value that was passed in
+     * @throws IllegalArgumentException if the value is empty
+     */
+    @NotNull
+    public static byte[] checkNotEmptyParam(String name, byte[] value) {
+        checkNotNullParamChecked("name", name);
+        checkNotNullParamChecked("value", value);
+        if (value.length == 0) throw CommonMessages.msg.emptyParam(name);
+        return value;
+    }
+
+    /**
+     * Check that the named parameter is not empty.  Use a standard exception message if it is.
+     *
+     * @param name the parameter name
+     * @param value the parameter value
+     * @return the value that was passed in
+     * @throws IllegalArgumentException if the value is empty
+     */
+    @NotNull
+    public static short[] checkNotEmptyParam(String name, short[] value) {
+        checkNotNullParamChecked("name", name);
+        checkNotNullParamChecked("value", value);
+        if (value.length == 0) throw CommonMessages.msg.emptyParam(name);
+        return value;
+    }
+
+    /**
+     * Check that the named parameter is not empty.  Use a standard exception message if it is.
+     *
+     * @param name the parameter name
+     * @param value the parameter value
+     * @return the value that was passed in
+     * @throws IllegalArgumentException if the value is empty
+     */
+    @NotNull
+    public static int[] checkNotEmptyParam(String name, int[] value) {
+        checkNotNullParamChecked("name", name);
+        checkNotNullParamChecked("value", value);
+        if (value.length == 0) throw CommonMessages.msg.emptyParam(name);
+        return value;
+    }
+
+    /**
+     * Check that the named parameter is not empty.  Use a standard exception message if it is.
+     *
+     * @param name the parameter name
+     * @param value the parameter value
+     * @return the value that was passed in
+     * @throws IllegalArgumentException if the value is empty
+     */
+    @NotNull
+    public static long[] checkNotEmptyParam(String name, long[] value) {
+        checkNotNullParamChecked("name", name);
+        checkNotNullParamChecked("value", value);
+        if (value.length == 0) throw CommonMessages.msg.emptyParam(name);
+        return value;
+    }
+
+    /**
+     * Check that the named parameter is not empty.  Use a standard exception message if it is.
+     *
+     * @param name the parameter name
+     * @param value the parameter value
+     * @return the value that was passed in
+     * @throws IllegalArgumentException if the value is empty
+     */
+    @NotNull
+    public static float[] checkNotEmptyParam(String name, float[] value) {
+        checkNotNullParamChecked("name", name);
+        checkNotNullParamChecked("value", value);
+        if (value.length == 0) throw CommonMessages.msg.emptyParam(name);
+        return value;
+    }
+
+    /**
+     * Check that the named parameter is not empty.  Use a standard exception message if it is.
+     *
+     * @param name the parameter name
+     * @param value the parameter value
+     * @return the value that was passed in
+     * @throws IllegalArgumentException if the value is empty
+     */
+    @NotNull
+    public static double[] checkNotEmptyParam(String name, double[] value) {
+        checkNotNullParamChecked("name", name);
+        checkNotNullParamChecked("value", value);
+        if (value.length == 0) throw CommonMessages.msg.emptyParam(name);
         return value;
     }
 
