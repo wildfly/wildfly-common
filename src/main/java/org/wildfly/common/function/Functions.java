@@ -24,6 +24,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.wildfly.common.Assert;
+
 /**
  * A set of utility methods which return common functions.
  */
@@ -146,6 +148,64 @@ public final class Functions {
         return (ExceptionSupplier<T, E>) (value == null ? ConstantSupplier.NULL : new ConstantSupplier<T>(value));
     }
 
+    /**
+     * Get a runnable which executes the given consumer with captured values.
+     *
+     * @param consumer the consumer to run (must not be {@code null})
+     * @param param1 the first parameter to pass
+     * @param param2 the second parameter to pass
+     * @param <T> the first parameter type
+     * @param <U> the second parameter type
+     * @return the capturing runnable
+     */
+    public static <T, U> Runnable capturingRunnable(BiConsumer<T, U> consumer, T param1, U param2) {
+        Assert.checkNotNullParam("consumer", consumer);
+        return new BiConsumerRunnable<T, U>(consumer, param1, param2);
+    }
+
+    /**
+     * Get a runnable which executes the given consumer with captured values.
+     *
+     * @param consumer the consumer to run (must not be {@code null})
+     * @param param the parameter to pass
+     * @param <T> the parameter type
+     * @return the capturing runnable
+     */
+    public static <T> Runnable capturingRunnable(Consumer<T> consumer, T param) {
+        Assert.checkNotNullParam("consumer", consumer);
+        return new ConsumerRunnable<T>(consumer, param);
+    }
+
+    /**
+     * Get a runnable which executes the given consumer with captured values.
+     *
+     * @param consumer the consumer to run (must not be {@code null})
+     * @param param1 the first parameter to pass
+     * @param param2 the second parameter to pass
+     * @param <T> the first parameter type
+     * @param <U> the second parameter type
+     * @param <E> the exception type
+     * @return the capturing runnable
+     */
+    public static <T, U, E extends Exception> ExceptionRunnable<E> exceptionCapturingRunnable(ExceptionBiConsumer<T, U, E> consumer, T param1, U param2) {
+        Assert.checkNotNullParam("consumer", consumer);
+        return new ExceptionBiConsumerRunnable<T, U, E>(consumer, param1, param2);
+    }
+
+    /**
+     * Get a runnable which executes the given consumer with captured values.
+     *
+     * @param consumer the consumer to run (must not be {@code null})
+     * @param param the parameter to pass
+     * @param <T> the parameter type
+     * @param <E> the exception type
+     * @return the capturing runnable
+     */
+    public static <T, E extends Exception> ExceptionRunnable<E> exceptionCapturingRunnable(ExceptionConsumer<T, E> consumer, T param) {
+        Assert.checkNotNullParam("consumer", consumer);
+        return new ExceptionConsumerRunnable<T, E>(consumer, param);
+    }
+
     static class RunnableConsumer implements Consumer<Runnable> {
         static final Consumer<Runnable> INSTANCE = new RunnableConsumer();
 
@@ -237,6 +297,86 @@ public final class Functions {
 
         public T get() {
             return arg1;
+        }
+
+        public String toString() {
+            return String.format("supplier(%s)", arg1);
+        }
+    }
+
+    static class BiConsumerRunnable<T, U> implements Runnable {
+        private final BiConsumer<T, U> consumer;
+        private final T param1;
+        private final U param2;
+
+        BiConsumerRunnable(final BiConsumer<T, U> consumer, final T param1, final U param2) {
+            this.consumer = consumer;
+            this.param1 = param1;
+            this.param2 = param2;
+        }
+
+        public void run() {
+            consumer.accept(param1, param2);
+        }
+
+        public String toString() {
+            return String.format("%s(%s,%s)", consumer, param1, param2);
+        }
+    }
+
+    static class ConsumerRunnable<T> implements Runnable {
+        private final Consumer<T> consumer;
+        private final T param;
+
+        ConsumerRunnable(final Consumer<T> consumer, final T param) {
+            this.consumer = consumer;
+            this.param = param;
+        }
+
+        public void run() {
+            consumer.accept(param);
+        }
+
+        public String toString() {
+            return String.format("%s(%s)", consumer, param);
+        }
+    }
+
+    static class ExceptionBiConsumerRunnable<T, U, E extends Exception> implements ExceptionRunnable<E> {
+        private final ExceptionBiConsumer<T, U, E> consumer;
+        private final T param1;
+        private final U param2;
+
+        ExceptionBiConsumerRunnable(final ExceptionBiConsumer<T, U, E> consumer, final T param1, final U param2) {
+            this.consumer = consumer;
+            this.param1 = param1;
+            this.param2 = param2;
+        }
+
+        public void run() throws E {
+            consumer.accept(param1, param2);
+        }
+
+        public String toString() {
+            return String.format("%s(%s,%s)", consumer, param1, param2);
+        }
+    }
+
+    static class ExceptionConsumerRunnable<T, E extends Exception> implements ExceptionRunnable<E> {
+        private final ExceptionConsumer<T, E> consumer;
+        private final T param;
+
+        ExceptionConsumerRunnable(final ExceptionConsumer<T, E> consumer, final T param) {
+            this.consumer = consumer;
+            this.param = param;
+        }
+
+        public void run() throws E {
+            consumer.accept(param);
+        }
+
+        public String toString() {
+            return String.format("%s(%s)", consumer, param);
         }
     }
 }
