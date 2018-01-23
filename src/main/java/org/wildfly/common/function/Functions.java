@@ -53,6 +53,15 @@ public final class Functions {
     }
 
     /**
+     * Get the singleton exception consumer which accepts and runs runnable instances.
+     *
+     * @return the runnable consumer
+     */
+    public static ExceptionConsumer<Runnable, RuntimeException> runnableExceptionConsumer() {
+        return RunnableExceptionConsumer.INSTANCE;
+    }
+
+    /**
      * Get the singleton consumer which accepts a consumer and an argument to hand to it.
      *
      * @param <T> the argument type
@@ -76,6 +85,17 @@ public final class Functions {
     }
 
     /**
+     * Get the singleton consumer which accepts a consumer and an argument to hand to it.
+     *
+     * @param <T> the argument type
+     * @return the consumer
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static <T> ExceptionBiConsumer<Consumer<T>, T, RuntimeException> consumerExceptionBiConsumer() {
+        return ConsumerExceptionBiConsumer.INSTANCE;
+    }
+
+    /**
      * Get the singleton function which accepts a supplier and returns the result of the supplier.
      *
      * @param <R> the result type
@@ -96,6 +116,17 @@ public final class Functions {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static <R, E extends Exception> ExceptionFunction<ExceptionSupplier<R, E>, R, E> exceptionSupplierFunction() {
         return ExceptionSupplierFunction.INSTANCE;
+    }
+
+    /**
+     * Get the singleton function which accepts a supplier and returns the result of the supplier.
+     *
+     * @param <R> the result type
+     * @return the function
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static <R> ExceptionFunction<Supplier<R>, R, RuntimeException> supplierExceptionFunction() {
+        return SupplierExceptionFunction.INSTANCE;
     }
 
     /**
@@ -148,6 +179,19 @@ public final class Functions {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static <T, R, E extends Exception> ExceptionBiFunction<ExceptionFunction<T, R, E>, T, R, E> exceptionFunctionBiFunction() {
         return ExceptionFunctionBiFunction.INSTANCE;
+    }
+
+    /**
+     * Get the singleton function which accepts a function and a parameter to pass to the function, and returns the
+     * result of the function.
+     *
+     * @param <T> the argument type
+     * @param <R> the result type
+     * @return the function
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static <T, R> ExceptionBiFunction<Function<T, R>, T, R, RuntimeException> functionExceptionBiFunction() {
+        return FunctionExceptionBiFunction.INSTANCE;
     }
 
     /**
@@ -253,6 +297,16 @@ public final class Functions {
         }
     }
 
+    static class RunnableExceptionConsumer implements ExceptionConsumer<Runnable, RuntimeException> {
+        static final RunnableExceptionConsumer INSTANCE = new RunnableExceptionConsumer();
+
+        private RunnableExceptionConsumer() {}
+
+        public void accept(final Runnable runnable) throws RuntimeException {
+            runnable.run();
+        }
+    }
+
     static class ConsumerBiConsumer implements BiConsumer<Consumer<Object>, Object> {
         static final BiConsumer INSTANCE = new ConsumerBiConsumer();
 
@@ -270,6 +324,16 @@ public final class Functions {
 
         public void accept(final ExceptionConsumer<Object, E> consumer, final Object o) throws E {
             consumer.accept(o);
+        }
+    }
+
+    static class ConsumerExceptionBiConsumer<T> implements ExceptionBiConsumer<Consumer<T>, T, RuntimeException> {
+        static final ExceptionBiConsumer INSTANCE = new ConsumerExceptionBiConsumer();
+
+        private ConsumerExceptionBiConsumer() {}
+
+        public void accept(final Consumer<T> consumer, final T t) throws RuntimeException {
+            consumer.accept(t);
         }
     }
 
@@ -293,6 +357,16 @@ public final class Functions {
         }
     }
 
+    static class SupplierExceptionFunction<R> implements ExceptionFunction<Supplier<R>, R, RuntimeException> {
+        static final SupplierExceptionFunction INSTANCE = new SupplierExceptionFunction();
+
+        private SupplierExceptionFunction() {}
+
+        public R apply(final Supplier<R> supplier) throws RuntimeException {
+            return supplier.get();
+        }
+    }
+
     static class FunctionSupplierBiFunction implements BiFunction<Function<Supplier<Object>, Object>, Supplier<Object>, Object> {
         static final BiFunction INSTANCE = new FunctionSupplierBiFunction();
 
@@ -310,6 +384,16 @@ public final class Functions {
 
         public Object apply(final ExceptionFunction<ExceptionSupplier<Object, E>, Object, E> function, final ExceptionSupplier<Object, E> supplier) throws E {
             return function.apply(supplier);
+        }
+    }
+
+    static class FunctionExceptionBiFunction<T, R> implements ExceptionBiFunction<Function<T, R>, T, R, RuntimeException> {
+        static final FunctionExceptionBiFunction INSTANCE = new FunctionExceptionBiFunction();
+
+        private FunctionExceptionBiFunction() {}
+
+        public R apply(final Function<T, R> function, final T t) throws RuntimeException {
+            return function.apply(t);
         }
     }
 
