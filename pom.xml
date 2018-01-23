@@ -44,7 +44,8 @@
     <properties>
         <version.org.jboss.logging.jboss-logging>3.3.1.Final</version.org.jboss.logging.jboss-logging>
         <version.org.jboss.logging.jboss-logging-tools>2.1.0.Final</version.org.jboss.logging.jboss-logging-tools>
-        <version.org.wildfly.common.jdk9-supplement>1.0.Final</version.org.wildfly.common.jdk9-supplement>
+
+        <jdk.min.version>9</jdk.min.version>
     </properties>
 
     <dependencies>
@@ -68,16 +69,11 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>org.wildfly.common</groupId>
-            <artifactId>wildfly-common-jdk9-supplement</artifactId>
-            <version>${version.org.wildfly.common.jdk9-supplement}</version>
+            <!-- This dependency is just for javadoc -->
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>1.3</version>
             <scope>provided</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.wildfly.common</groupId>
-                    <artifactId>wildfly-common</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -86,6 +82,36 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <profiles>
+        <profile>
+            <id>java8-test-profile</id>
+            <activation>
+                <property>
+                    <name>java8.home</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>java8-test</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <configuration>
+                                    <jvm>${java8.home}/bin/java</jvm>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
     <build>
         <resources>
@@ -100,7 +126,6 @@
         </resources>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
                     <detectJavaApiLink>false</detectJavaApiLink>
@@ -115,35 +140,59 @@
                 </configuration>
             </plugin>
             <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.7.0-jboss-1</version>
                 <executions>
                     <execution>
-                        <id>add-java9-supplement</id>
-                        <phase>generate-resources</phase>
+                        <id>default-compile</id>
+                        <phase>compile</phase>
                         <goals>
-                            <goal>unpack-dependencies</goal>
+                            <goal>compile</goal>
                         </goals>
                         <configuration>
-                            <includeGroupIds>org.wildfly.common</includeGroupIds>
-                            <includeArtifactIds>wildfly-common-jdk9-supplement</includeArtifactIds>
-                            <excludeTransitive>true</excludeTransitive>
-                            <includes>**/*.class</includes>
-                            <outputDirectory>${project.build.directory}/generated-resources/META-INF/versions/9</outputDirectory>
+                            <release>8</release>
+                            <buildDirectory>${project.build.directory}</buildDirectory>
+                            <compileSourceRoots>${project.compileSourceRoots}</compileSourceRoots>
+                            <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>compile-java9</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <release>9</release>
+                            <buildDirectory>${project.build.directory}</buildDirectory>
+                            <compileSourceRoots>${project.basedir}/src/main/java9</compileSourceRoots>
+                            <outputDirectory>${project.build.directory}/classes/META-INF/versions/9</outputDirectory>
+                            <additionalClasspathElements>
+                                <additionalClasspathElement>${project.build.outputDirectory}</additionalClasspathElement>
+                            </additionalClasspathElements>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
                     <trimStackTrace>false</trimStackTrace>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>default-test</id>
+                        <configuration>
+                            <classesDirectory>${project.build.directory}/classes/META-INF/versions/9</classesDirectory>
+                            <additionalClasspathElements>
+                                <additionalClasspathElement>${project.build.directory}/classes</additionalClasspathElement>
+                            </additionalClasspathElements>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
-<!-- WFCOM-21 - disable OSGi output
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <archive>
@@ -156,6 +205,7 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
+                        <_fixupmessages>"Classes found in the wrong directory";is:=warning</_fixupmessages>
                         <Export-Package>
                             !*._private,
                             org.wildfly.common*;version=${project.version};-noimport:=true
@@ -174,7 +224,26 @@
                     </execution>
                 </executions>
             </plugin>
--->
+            <plugin>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce-java8-tests</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireProperty>
+                                    <property>java8.home</property>
+                                    <message>The "java8.home" property must be set on deploy to run tests under Java 8</message>
+                                </requireProperty>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>
