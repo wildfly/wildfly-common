@@ -116,7 +116,7 @@ public class TestRemoteExceptionCause {
     public void serial0() throws Exception {
         doSerialTest(() -> new SQLException("reason", "sql-state", 12345), (t, c) -> {
             assertEquals(t.getClass().getName(), c.getExceptionClassName());
-            assertArrayEquals(t.getStackTrace(), c.getStackTrace());
+            assertStackTraceArrayEquals(t, c);
         });
     }
 
@@ -129,8 +129,8 @@ public class TestRemoteExceptionCause {
         }, (t, c) -> {
             assertEquals(t.getClass().getName(), c.getExceptionClassName());
             assertEquals(t.getCause().getClass().getName(), c.getCause().getExceptionClassName());
-            assertArrayEquals(t.getStackTrace(), c.getStackTrace());
-            assertArrayEquals(t.getCause().getStackTrace(), c.getCause().getStackTrace());
+            assertStackTraceArrayEquals(t, c);
+            assertStackTraceArrayEquals(t.getCause(), c.getCause());
         });
     }
 
@@ -150,8 +150,8 @@ public class TestRemoteExceptionCause {
             assertEquals(t.getCause().getClass().getName(), c.getCause().getExceptionClassName());
             assertEquals(t.getCause().getCause().getClass().getName(), c.getCause().getCause().getExceptionClassName());
             assertSame(c.getCause().getCause().getCause(), c);
-            assertArrayEquals(t.getStackTrace(), c.getStackTrace());
-            assertArrayEquals(t.getCause().getStackTrace(), c.getCause().getStackTrace());
+            assertStackTraceArrayEquals(t, c);
+            assertStackTraceArrayEquals(t.getCause(), c.getCause());
         });
     }
 
@@ -171,7 +171,24 @@ public class TestRemoteExceptionCause {
             assertEquals(t.getSuppressed()[0].getClass().getName(), ((RemoteExceptionCause) c.getSuppressed()[0]).getExceptionClassName());
             assertEquals(t.getSuppressed()[0].getSuppressed()[0].getClass().getName(), ((RemoteExceptionCause) c.getSuppressed()[0].getSuppressed()[0]).getExceptionClassName());
             assertSame(c.getSuppressed()[0].getSuppressed()[0].getSuppressed()[0], c);
-            assertArrayEquals(t.getStackTrace(), c.getStackTrace());
+            assertStackTraceArrayEquals(t, c);
         });
+    }
+
+    static void assertStackTraceArrayEquals(Throwable t1, Throwable t2) {
+        if (t1 == t2) return;
+        assertNotNull("t1", t1);
+        assertNotNull("t2", t2);
+        final StackTraceElement[] s1 = t1.getStackTrace();
+        final StackTraceElement[] s2 = t2.getStackTrace();
+        if (s1 == s2) return;
+        final int length = s1.length;
+        assertEquals("Stack trace lengths differ", length, s2.length);
+        for (int i = 0; i < length; i ++) {
+            assertEquals("Class name difference at index " + i, s1[i].getClassName(), s2[i].getClassName());
+            assertEquals("Method name difference at index " + i, s1[i].getMethodName(), s2[i].getMethodName());
+            assertEquals("File name difference at index " + i, s1[i].getFileName(), s2[i].getFileName());
+            assertEquals("Line number difference at index " + i, s1[i].getLineNumber(), s2[i].getLineNumber());
+        }
     }
 }
