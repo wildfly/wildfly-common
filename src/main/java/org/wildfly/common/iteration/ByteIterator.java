@@ -125,7 +125,7 @@ public abstract class ByteIterator implements BiDirIntIterator, IndexIterator {
     }
 
     public long getLE64() throws NoSuchElementException {
-        return (long) next() | (long) next() << 8 | (long) next() << 16 | (long) next() << 24 | (long) next() << 32 | (long) next() << 40 | (long) next() << 48 | (long) next() << 52;
+        return (long) next() | (long) next() << 8 | (long) next() << 16 | (long) next() << 24 | (long) next() << 32 | (long) next() << 40 | (long) next() << 48 | (long) next() << 56;
     }
 
     public int getPackedBE32() throws NoSuchElementException {
