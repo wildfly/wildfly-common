@@ -23,6 +23,7 @@ import static java.security.AccessController.doPrivileged;
 import java.security.PrivilegedAction;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.wildfly.common.Assert;
@@ -34,6 +35,7 @@ import org.wildfly.common.Assert;
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  */
 public final class ContextManager<C extends Contextual<C>> implements Supplier<C> {
+    private final AtomicReference<Function<ClassLoader, C>> classLoaderDefaultFunctionRef = new AtomicReference<>();
     private final AtomicReference<Supplier<C>> globalDefaultSupplierRef = new AtomicReference<>();
     private final ConcurrentHashMap<ClassLoader, Supplier<C>> perClassLoaderDefault = new ConcurrentHashMap<>();
     private final Class<C> type;
@@ -128,11 +130,11 @@ public final class ContextManager<C extends Contextual<C>> implements Supplier<C
     }
 
     /**
-     * Get the class loader default instance.  Note that the class loader default is determined by way of a {@link Supplier} so
-     * the returned value may vary from call to call, depending on the policy of that {@code Supplier}.
+     * Get the class loader default instance.  Note that the class loader default is determined by way of a {@link Supplier} or, if none exists,
+     * a {@link Function}, so the returned value may vary from call to call, depending on the policy of that {@code Supplier} or {@code Function}.
      *
      * @param classLoader the class loader
-     * @return the global default, or {@code null} if none is installed or available
+     * @return the class loader default, or {@code null} if none is installed or available
      */
     public C getClassLoaderDefault(final ClassLoader classLoader) {
         final SecurityManager sm = System.getSecurityManager();
@@ -141,7 +143,11 @@ public final class ContextManager<C extends Contextual<C>> implements Supplier<C
         }
         if (classLoader != null) {
             final Supplier<C> supplier = perClassLoaderDefault.get(classLoader);
-            return supplier == null ? null : supplier.get();
+            if (supplier != null) {
+                return supplier.get();
+            }
+            Function<ClassLoader, C> function = this.classLoaderDefaultFunctionRef.get();
+            return function != null ? function.apply(classLoader) : null;
         }
         return null;
     }
@@ -184,6 +190,20 @@ public final class ContextManager<C extends Contextual<C>> implements Supplier<C
         } else {
             perClassLoaderDefault.put(classLoader, () -> classLoaderDefault);
         }
+    }
+
+    /**
+     * Set the class loader default function.  The function should have a reasonable policy such
+     * that callers of {@link #getClassLoaderDefault(ClassLoader)} will obtain results consistent with a general expectation of stability.
+     *
+     * @param function the context function, or {@code null} to remove the default
+     */
+    public void setClassLoaderDefault(final Function<ClassLoader, C> function) {
+        final SecurityManager sm = System.getSecurityManager();
+        if (sm != null) {
+            sm.checkPermission(new ContextPermission(name, ContextPermission.STR_SET_CLASSLOADER_DEF));
+        }
+        classLoaderDefaultFunctionRef.set(function);
     }
 
     /**
@@ -260,6 +280,11 @@ public final class ContextManager<C extends Contextual<C>> implements Supplier<C
         final State<C> state = stateRef.get();
         C c = state.current;
         if (c != null) return c;
+        Supplier<C> supplier = state.defaultSupplier;
+        if (supplier != null) {
+            c = supplier.get();
+            if (c != null) return c;
+        }
         final Thread currentThread = Thread.currentThread();
         final SecurityManager sm = System.getSecurityManager();
         ClassLoader classLoader;
@@ -268,18 +293,18 @@ public final class ContextManager<C extends Contextual<C>> implements Supplier<C
         } else {
             classLoader = currentThread.getContextClassLoader();
         }
-        Supplier<C> supplier = perClassLoaderDefault.get(classLoader);
-        if (supplier != null) {
-            c = supplier.get();
-            if (c != null) return c;
-        }
-        supplier = state.defaultSupplier;
+        supplier = perClassLoaderDefault.get(classLoader);
         if (supplier != null) {
             c = supplier.get();
             if (c != null) return c;
         }
         supplier = globalDefaultSupplierRef.get();
-        return supplier != null ? supplier.get() : null;
+        if (supplier != null) {
+            c = supplier.get();
+            if (c != null) return c;
+        }
+        Function<ClassLoader, C> function = this.classLoaderDefaultFunctionRef.get();
+        return (function != null) ? function.apply(classLoader) : null;
     }
 
     C getAndSetCurrent(Contextual<C> newVal) {
