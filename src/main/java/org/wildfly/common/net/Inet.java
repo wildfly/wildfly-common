@@ -98,6 +98,51 @@ public final class Inet {
     }
 
     /**
+     * Get a string representation of the given address which is suitable for use as the host component of a URL.
+     *
+     * @param inetAddress the address (must not be {@code null})
+     * @param useHostNameIfPresent {@code true} to preserve the host name string in the address, {@code false} to always give
+     *     an IP address string
+     * @return the string representation (not {@code null})
+     */
+    public static String toURLString(InetAddress inetAddress, boolean useHostNameIfPresent) {
+        Assert.checkNotNullParam("inetAddress", inetAddress);
+        if (useHostNameIfPresent) {
+            final String hostName = getHostNameIfResolved(inetAddress);
+            if (hostName != null) {
+                if (inetAddress instanceof Inet6Address && isInet6Address(hostName)) {
+                    return "[" + hostName + "]";
+                } else {
+                    // return it even if it's an IP address or whatever
+                    return hostName;
+                }
+            }
+        }
+        if (inetAddress instanceof Inet6Address) {
+            return "[" + toOptimalString(inetAddress) + "]";
+        } else {
+            return toOptimalString(inetAddress);
+        }
+    }
+
+    /**
+     * Get a string representation of the given address bytes which is suitable for use as the host component of a URL.
+     *
+     * @param addressBytes the address bytes (must not be {@code null})
+     * @return the string representation (not {@code null})
+     */
+    public static String toURLString(byte[] addressBytes) {
+        Assert.checkNotNullParam("addressBytes", addressBytes);
+        if (addressBytes.length == 4) {
+            return (addressBytes[0] & 0xff) + "." + (addressBytes[1] & 0xff) + "." + (addressBytes[2] & 0xff) + "." + (addressBytes[3] & 0xff);
+        } else if (addressBytes.length == 16) {
+            return "[" + toOptimalStringV6(addressBytes) + "]";
+        } else {
+            throw CommonMessages.msg.invalidAddressBytes(addressBytes.length);
+        }
+    }
+
+    /**
      * Get the IPv6 equivalent of the given address.  If the address is IPv4 then it is returned as a compatibility
      * address.
      *
