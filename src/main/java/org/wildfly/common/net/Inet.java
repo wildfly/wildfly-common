@@ -20,6 +20,7 @@ package org.wildfly.common.net;
 
 import static java.security.AccessController.doPrivileged;
 
+import java.lang.reflect.Array;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -182,6 +183,107 @@ public final class Inet {
             return hostString.isEmpty() ? "" : null;
         }
         return hostString;
+    }
+
+    /**
+     * Get a copy of the given socket address, but with a resolved address component.
+     *
+     * @param address the (possibly unresolved) address (must not be {@code null})
+     * @return the resolved address (not {@code null})
+     * @throws UnknownHostException if address resolution failed
+     */
+    public static InetSocketAddress getResolved(InetSocketAddress address) throws UnknownHostException {
+        return getResolved(address, InetAddress.class);
+    }
+
+    /**
+     * Get a copy of the given socket address, but with a resolved address component of the given type.
+     *
+     * @param address the (possibly unresolved) address (must not be {@code null})
+     * @param addressType the class of the {@code InetAddress} to search for (must not be {@code null})
+     * @return the resolved address (not {@code null})
+     * @throws UnknownHostException if address resolution failed, or if no addresses of the given type were found, or
+     *     if the given address was already resolved but is not of the given address type
+     */
+    public static InetSocketAddress getResolved(InetSocketAddress address, Class<? extends InetAddress> addressType) throws UnknownHostException {
+        Assert.checkNotNullParam("address", address);
+        Assert.checkNotNullParam("addressType", addressType);
+        if (! address.isUnresolved()) {
+            if (! addressType.isInstance(address.getAddress())) {
+                // the address part does not match
+                throw new UnknownHostException(address.getHostString());
+            }
+            return address;
+        }
+        return new InetSocketAddress(getAddressByNameAndType(address.getHostString(), addressType), address.getPort());
+    }
+
+    /**
+     * Resolve the given host name, returning the first answer with the given address type.
+     *
+     * @param hostName the host name to resolve (must not be {@code null})
+     * @param addressType the class of the {@code InetAddress} to search for (must not be {@code null})
+     * @param <T> the type of the {@code InetAddress} to search for
+     * @return the resolved address (not {@code null})
+     * @throws UnknownHostException if address resolution failed or if no addresses of the given type were found
+     */
+    public static <T extends InetAddress> T getAddressByNameAndType(String hostName, Class<T> addressType) throws UnknownHostException {
+        Assert.checkNotNullParam("hostName", hostName);
+        Assert.checkNotNullParam("addressType", addressType);
+        if (addressType == InetAddress.class) {
+            return addressType.cast(InetAddress.getByName(hostName));
+        }
+        for (InetAddress inetAddress : InetAddress.getAllByName(hostName)) {
+            if (addressType.isInstance(inetAddress)) {
+                return addressType.cast(inetAddress);
+            }
+        }
+        // no i18n here because this is a "standard" exception
+        throw new UnknownHostException(hostName);
+    }
+
+    /**
+     * Resolve the given host name, returning all answers with the given address type.
+     *
+     * @param hostName the host name to resolve (must not be {@code null})
+     * @param addressType the class of the {@code InetAddress} to search for (must not be {@code null})
+     * @param <T> the type of the {@code InetAddress} to search for
+     * @return the resolved addresses (not {@code null})
+     * @throws UnknownHostException if address resolution failed or if no addresses of the given type were found
+     */
+    @SuppressWarnings("unchecked")
+    public static <T extends InetAddress> T[] getAllAddressesByNameAndType(String hostName, Class<T> addressType) throws UnknownHostException {
+        Assert.checkNotNullParam("hostName", hostName);
+        Assert.checkNotNullParam("addressType", addressType);
+        if (addressType == InetAddress.class) {
+            // safe because T == InetAddress
+            return (T[]) InetAddress.getAllByName(hostName);
+        }
+        final InetAddress[] addresses = InetAddress.getAllByName(hostName);
+        final int length = addresses.length;
+        int count = 0;
+        for (InetAddress inetAddress : addresses) {
+            if (addressType.isInstance(inetAddress)) {
+                count ++;
+            }
+        }
+        if (count == 0) {
+            // no i18n here because this is a "standard" exception
+            throw new UnknownHostException(hostName);
+        }
+        final T[] newArray = (T[]) Array.newInstance(addressType, count);
+        if (count == length) {
+            //noinspection SuspiciousSystemArraycopy
+            System.arraycopy(addresses, 0, newArray, 0, length);
+        } else {
+            int idx = 0;
+            for (InetAddress inetAddress : addresses) {
+                if (addressType.isInstance(inetAddress)) {
+                    newArray[idx] = addressType.cast(inetAddress);
+                }
+            }
+        }
+        return newArray;
     }
 
     /**
