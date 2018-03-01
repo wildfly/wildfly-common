@@ -27,6 +27,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.net.URI;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.security.PrivilegedAction;
@@ -183,6 +184,41 @@ public final class Inet {
             return hostString.isEmpty() ? "" : null;
         }
         return hostString;
+    }
+
+    /**
+     * Get a resolved socket address from the given URI.
+     *
+     * @param uri the URI (must not be {@code null})
+     * @param defaultPort the default port to use if none is given (must be in the range {@code 1 ≤ n ≤ 65535}
+     * @param addressType the class of the {@code InetAddress} to search for (must not be {@code null})
+     * @return the socket address, or {@code null} if the URI does not have a host component
+     * @throws UnknownHostException if address resolution failed
+     */
+    public static InetSocketAddress getResolved(URI uri, int defaultPort, Class<? extends InetAddress> addressType) throws UnknownHostException {
+        Assert.checkNotNullParam("uri", uri);
+        Assert.checkMinimumParameter("defaultPort", 1, defaultPort);
+        Assert.checkMaximumParameter("defaultPort", 65535, defaultPort);
+        Assert.checkNotNullParam("addressType", addressType);
+        final String uriHost = uri.getHost();
+        if (uriHost == null) {
+            return null;
+        }
+        final InetAddress resolved = getAddressByNameAndType(uriHost, addressType);
+        final int uriPort = uri.getPort();
+        return uriPort != - 1 ? new InetSocketAddress(resolved, uriPort) : new InetSocketAddress(resolved, defaultPort);
+    }
+
+    /**
+     * Get the resolved socket address from the given URI.
+     *
+     * @param uri the URI (must not be {@code null})
+     * @param defaultPort the default port to use if none is given (must be in the range {@code 1 ≤ n ≤ 65535}
+     * @return the socket address, or {@code null} if the URI does not have a host component
+     * @throws UnknownHostException if address resolution failed
+     */
+    public static InetSocketAddress getResolved(URI uri, int defaultPort) throws UnknownHostException {
+        return getResolved(uri, defaultPort, InetAddress.class);
     }
 
     /**
