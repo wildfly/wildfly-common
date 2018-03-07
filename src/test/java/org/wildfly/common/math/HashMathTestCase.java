@@ -19,12 +19,31 @@
 package org.wildfly.common.math;
 
 import static org.junit.Assert.*;
-import static org.wildfly.common.math.HashMath.multiHashOrdered;
-import static org.wildfly.common.math.HashMath.multiHashUnordered;
+import static org.wildfly.common.math.HashMath.*;
 
 import org.junit.Test;
 
 public class HashMathTestCase {
+
+    @Test
+    public void testPowerOfTwo() {
+        assertEquals(0, roundToPowerOfTwo(0));
+        assertEquals(1, roundToPowerOfTwo(1));
+        assertEquals(4, roundToPowerOfTwo(3));
+        assertEquals(4, roundToPowerOfTwo(4));
+        assertEquals(8, roundToPowerOfTwo(5));
+        assertEquals(8, roundToPowerOfTwo(7));
+        assertEquals(8, roundToPowerOfTwo(8));
+        assertEquals(128, roundToPowerOfTwo(128));
+        assertEquals(256, roundToPowerOfTwo(129));
+        assertEquals(256, roundToPowerOfTwo(200));
+        assertEquals(256, roundToPowerOfTwo(255));
+        assertEquals(256, roundToPowerOfTwo(256));
+        assertEquals(0x2000_0000, roundToPowerOfTwo(0x2000_0000));
+        assertEquals(0x4000_0000, roundToPowerOfTwo(0x2000_0001));
+        assertEquals(0x4000_0000, roundToPowerOfTwo(0x3FFF_FFFF));
+        assertEquals(0x4000_0000, roundToPowerOfTwo(0x4000_0000));
+    }
 
     @Test
     public void testOrderedCommutative() {
