@@ -18,6 +18,8 @@
 
 package org.wildfly.common.math;
 
+import org.wildfly.common.Assert;
+
 /**
  * Routines which are useful for hashcode computation, among other things.
  *
@@ -28,6 +30,18 @@ public final class HashMath {
     private static final int PRESELECTED_PRIME = 1299827;
 
     private HashMath() {
+    }
+
+    /**
+     * Round the given value up to the next positive power of two.
+     *
+     * @param value the value (must not be negative and must be less than or equal to {@code 2^31})
+     * @return the rounded power of two value
+     */
+    public static int roundToPowerOfTwo(int value) {
+        Assert.checkMinimumParameter("value", 0, value);
+        Assert.checkMaximumParameter("value", 0x4000_0000, value);
+        return value <= 1 ? value : Integer.highestOneBit(value - 1) << 1;
     }
 
     /**
