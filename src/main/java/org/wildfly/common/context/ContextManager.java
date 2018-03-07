@@ -139,11 +139,12 @@ public final class ContextManager<C extends Contextual<C>> implements Supplier<C
         if (sm != null) {
             sm.checkPermission(new ContextPermission(name, ContextPermission.STR_GET_CLASSLOADER_DEF));
         }
-        if (classLoader != null) {
-            final Supplier<C> supplier = perClassLoaderDefault.get(classLoader);
-            return supplier == null ? null : supplier.get();
+        final Supplier<C> supplier;
+        if (classLoader == null) {
+            return null;
         }
-        return null;
+        supplier = perClassLoaderDefault.get(classLoader);
+        return supplier == null ? null : supplier.get();
     }
 
     /**
@@ -268,10 +269,13 @@ public final class ContextManager<C extends Contextual<C>> implements Supplier<C
         } else {
             classLoader = currentThread.getContextClassLoader();
         }
-        Supplier<C> supplier = perClassLoaderDefault.get(classLoader);
-        if (supplier != null) {
-            c = supplier.get();
-            if (c != null) return c;
+        Supplier<C> supplier;
+        if (classLoader != null) {
+            supplier = perClassLoaderDefault.get(classLoader);
+            if (supplier != null) {
+                c = supplier.get();
+                if (c != null) return c;
+            }
         }
         supplier = state.defaultSupplier;
         if (supplier != null) {
