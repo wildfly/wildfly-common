@@ -80,6 +80,9 @@ public interface CommonMessages {
     @Message(id = 12, value = "Invalid address length of %d; must be 4 or 16")
     IllegalArgumentException invalidAddressBytes(int length);
 
+    @Message(id = 13, value = "Invalid address string \"%s\"")
+    IllegalArgumentException invalidAddress(String address);
+
     // execution path validation
 
     @Message(id = 100, value = "Method \"%s\" of class \"%s\" is not implemented")

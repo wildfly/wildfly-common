@@ -421,37 +421,77 @@ public final class Inet {
     /**
      * Parse an IPv6 address into an {@code Inet6Address} object.
      *
-     * @param string the address to parse
+     * @param address the address to parse
      * @return the parsed address, or {@code null} if the address is not valid
      */
-    public static Inet6Address parseInet6Address(String string) {
-        final byte[] bytes = parseInet6AddressToBytes(string);
+    public static Inet6Address parseInet6Address(String address) {
+        return parseInet6Address(address, null);
+    }
+
+    /**
+     * Parse an IPv6 address into an {@code Inet6Address} object.
+     *
+     * @param address the address to parse (must not be {@code null})
+     * @param hostName the host name to use in the resultant object, or {@code null} to use the string representation of
+     *      the address
+     * @return the parsed address, or {@code null} if the address is not valid
+     */
+    public static Inet6Address parseInet6Address(String address, String hostName) {
+        final byte[] bytes = parseInet6AddressToBytes(address);
         if (bytes == null) {
             return null;
         }
         int scopeId = 0;
-        Inet6Address address;
+        Inet6Address inetAddress;
         try {
-            address = Inet6Address.getByAddress(string, bytes, 0);
+            inetAddress = Inet6Address.getByAddress(hostName == null ? toOptimalStringV6(bytes) : hostName, bytes, 0);
         } catch (UnknownHostException e) {
             // not possible
             throw new IllegalStateException(e);
         }
-        final int pctIdx = string.indexOf('%');
+        final int pctIdx = address.indexOf('%');
         if (pctIdx != -1) {
-            scopeId = getScopeId(string.substring(pctIdx + 1), address);
+            scopeId = getScopeId(address.substring(pctIdx + 1), inetAddress);
             if (scopeId == 0) {
                 // address not valid after all...
                 return null;
             }
             try {
-                address = Inet6Address.getByAddress(string, bytes, scopeId);
+                inetAddress = Inet6Address.getByAddress(hostName == null ? toOptimalStringV6(bytes) : hostName, bytes, scopeId);
             } catch (UnknownHostException e) {
                 // not possible
                 throw new IllegalStateException(e);
             }
         }
-        return address;
+        return inetAddress;
+    }
+
+    /**
+     * Parse an IPv6 address into an {@code Inet6Address} object, throwing an exception on failure.
+     *
+     * @param address the address to parse
+     * @return the parsed address (not {@code null})
+     * @throws IllegalArgumentException if the address is not valid
+     */
+    public static Inet6Address parseInet6AddressOrFail(String address) {
+        final Inet6Address result = parseInet6Address(address, null);
+        if (result == null) throw CommonMessages.msg.invalidAddress(address);
+        return result;
+    }
+
+    /**
+     * Parse an IPv6 address into an {@code Inet6Address} object.
+     *
+     * @param address the address to parse (must not be {@code null})
+     * @param hostName the host name to use in the resultant object, or {@code null} to use the string representation of
+     *      the address
+     * @return the parsed address (not {@code null})
+     * @throws IllegalArgumentException if the address is not valid
+     */
+    public static Inet6Address parseInet6AddressOrFail(String address, String hostName) {
+        final Inet6Address result = parseInet6Address(address, hostName);
+        if (result == null) throw CommonMessages.msg.invalidAddress(address);
+        return result;
     }
 
     /**
@@ -471,16 +511,56 @@ public final class Inet {
      * @return the parsed address, or {@code null} if the address is not valid
      */
     public static Inet4Address parseInet4Address(String address) {
+        return parseInet4Address(address, null);
+    }
+
+    /**
+     * Parse an IPv4 address into an {@code Inet4Address} object.
+     *
+     * @param address the address to parse
+     * @param hostName the host name to use in the resultant object, or {@code null} to use the string representation of
+     *      the address
+     * @return the parsed address, or {@code null} if the address is not valid
+     */
+    public static Inet4Address parseInet4Address(String address, String hostName) {
         final byte[] bytes = parseInet4AddressToBytes(address);
         if (bytes == null) {
             return null;
         }
         try {
-            return (Inet4Address) Inet4Address.getByAddress(address, bytes);
+            return (Inet4Address) Inet4Address.getByAddress(hostName == null ? toOptimalString(bytes) : hostName, bytes);
         } catch (UnknownHostException e) {
             // not possible
             throw new IllegalStateException(e);
         }
+    }
+
+    /**
+     * Parse an IPv4 address into an {@code Inet4Address} object, throwing an exception on failure.
+     *
+     * @param address the address to parse
+     * @return the parsed address (not {@code null})
+     * @throws IllegalArgumentException if the address is not valid
+     */
+    public static Inet4Address parseInet4AddressOrFail(String address) {
+        final Inet4Address result = parseInet4Address(address, null);
+        if (result == null) throw CommonMessages.msg.invalidAddress(address);
+        return result;
+    }
+
+    /**
+     * Parse an IPv4 address into an {@code Inet4Address} object.
+     *
+     * @param address the address to parse (must not be {@code null})
+     * @param hostName the host name to use in the resultant object, or {@code null} to use the string representation of
+     *      the address
+     * @return the parsed address (not {@code null})
+     * @throws IllegalArgumentException if the address is not valid
+     */
+    public static Inet4Address parseInet4AddressOrFail(String address, String hostName) {
+        final Inet4Address result = parseInet4Address(address, hostName);
+        if (result == null) throw CommonMessages.msg.invalidAddress(address);
+        return result;
     }
 
     /**
@@ -490,12 +570,52 @@ public final class Inet {
      * @return the parsed address, or {@code null} if the address is not valid
      */
     public static InetAddress parseInetAddress(String address) {
+        return parseInetAddress(address, null);
+    }
+
+    /**
+     * Parse an IP address into an {@code InetAddress} object.
+     *
+     * @param address the address to parse
+     * @param hostName the host name to use in the resultant object, or {@code null} to use the string representation of
+     *      the address
+     * @return the parsed address, or {@code null} if the address is not valid
+     */
+    public static InetAddress parseInetAddress(String address, String hostName) {
         // simple heuristic
         if (address.indexOf(':') != -1) {
-            return parseInet6Address(address);
+            return parseInet6Address(address, hostName);
         } else {
-            return parseInet4Address(address);
+            return parseInet4Address(address, hostName);
         }
+    }
+
+    /**
+     * Parse an IP address into an {@code InetAddress} object, throwing an exception on failure.
+     *
+     * @param address the address to parse
+     * @return the parsed address (not {@code null})
+     * @throws IllegalArgumentException if the address is not valid
+     */
+    public static InetAddress parseInetAddressOrFail(String address) {
+        final InetAddress result = parseInetAddress(address, null);
+        if (result == null) throw CommonMessages.msg.invalidAddress(address);
+        return result;
+    }
+
+    /**
+     * Parse an IP address into an {@code InetAddress} object.
+     *
+     * @param address the address to parse (must not be {@code null})
+     * @param hostName the host name to use in the resultant object, or {@code null} to use the string representation of
+     *      the address
+     * @return the parsed address (not {@code null})
+     * @throws IllegalArgumentException if the address is not valid
+     */
+    public static InetAddress parseInetAddressOrFail(String address, String hostName) {
+        final InetAddress result = parseInetAddress(address, hostName);
+        if (result == null) throw CommonMessages.msg.invalidAddress(address);
+        return result;
     }
 
     /**
