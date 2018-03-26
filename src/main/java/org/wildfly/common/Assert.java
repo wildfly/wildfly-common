@@ -114,6 +114,22 @@ public final class Assert {
      * @throws IllegalArgumentException if the value is empty
      */
     @NotNull
+    public static CharSequence checkNotEmptyParam(String name, CharSequence value) {
+        checkNotNullParamChecked("name", name);
+        checkNotNullParamChecked("value", value);
+        if (value.length() == 0) throw CommonMessages.msg.emptyParam(name);
+        return value;
+    }
+
+    /**
+     * Check that the named parameter is not empty.  Use a standard exception message if it is.
+     *
+     * @param name the parameter name
+     * @param value the parameter value
+     * @return the value that was passed in
+     * @throws IllegalArgumentException if the value is empty
+     */
+    @NotNull
     public static <E, T extends Collection<E>> T checkNotEmptyParam(String name, T value) {
         checkNotNullParamChecked("name", name);
         checkNotNullParamChecked("value", value);
