@@ -277,6 +277,54 @@ public final class Functions {
         return new ExceptionConsumerRunnable<T, E>(consumer, param);
     }
 
+    /**
+     * Get a consumer which discards the values it is given.
+     *
+     * @param <T> the parameter type
+     * @return the discarding consumer
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> Consumer<T> discardingConsumer() {
+        return DiscardingConsumer.INSTANCE;
+    }
+
+    /**
+     * Get a consumer which discards the values it is given.
+     *
+     * @param <T> the parameter type
+     * @param <E> the exception type
+     * @return the discarding consumer
+     */
+    @SuppressWarnings("unchecked")
+    public static <T, E extends Exception> ExceptionConsumer<T, E> discardingExceptionConsumer() {
+        return DiscardingConsumer.INSTANCE;
+    }
+
+    /**
+     * Get a consumer which discards the values it is given.
+     *
+     * @param <T> the first parameter type
+     * @param <U> the second parameter type
+     * @return the discarding consumer
+     */
+    @SuppressWarnings("unchecked")
+    public static <T, U> BiConsumer<T, U> discardingBiConsumer() {
+        return DiscardingBiConsumer.INSTANCE;
+    }
+
+    /**
+     * Get a consumer which discards the values it is given.
+     *
+     * @param <T> the first parameter type
+     * @param <U> the second parameter type
+     * @param <E> the exception type
+     * @return the discarding consumer
+     */
+    @SuppressWarnings("unchecked")
+    public static <T, U, E extends Exception> ExceptionBiConsumer<T, U, E> discardingExceptionBiConsumer() {
+        return DiscardingBiConsumer.INSTANCE;
+    }
+
     static class RunnableConsumer implements Consumer<Runnable> {
         static final Consumer<Runnable> INSTANCE = new RunnableConsumer();
 
@@ -510,6 +558,26 @@ public final class Functions {
 
         public String toString() {
             return String.format("%s(%s)", consumer, param);
+        }
+    }
+
+    static class DiscardingConsumer<T, E extends Exception> implements Consumer<T>, ExceptionConsumer<T, E> {
+        static final DiscardingConsumer INSTANCE = new DiscardingConsumer();
+
+        private DiscardingConsumer() {
+        }
+
+        public void accept(final T t) {
+        }
+    }
+
+    static class DiscardingBiConsumer<T, U, E extends Exception> implements BiConsumer<T, U>, ExceptionBiConsumer<T, U, E> {
+        static final DiscardingBiConsumer INSTANCE = new DiscardingBiConsumer();
+
+        private DiscardingBiConsumer() {
+        }
+
+        public void accept(final T t, final U u) {
         }
     }
 }
