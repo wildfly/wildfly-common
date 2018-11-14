@@ -29,8 +29,8 @@
 
     <parent>
         <groupId>org.jboss</groupId>
-        <artifactId>jboss-parent</artifactId>
-        <version>24</version>
+        <artifactId>jboss-parent-mr-jar</artifactId>
+        <version>30</version>
     </parent>
 
     <licenses>
@@ -95,36 +95,6 @@
         </dependency>
     </dependencies>
 
-    <profiles>
-        <profile>
-            <id>java8-test-profile</id>
-            <activation>
-                <property>
-                    <name>java8.home</name>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>java8-test</id>
-                                <phase>test</phase>
-                                <goals>
-                                    <goal>test</goal>
-                                </goals>
-                                <configuration>
-                                    <jvm>${java8.home}/bin/java</jvm>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-
     <build>
         <resources>
             <resource>
@@ -144,75 +114,11 @@
                     <detectLinks>false</detectLinks>
                     <doctitle><![CDATA[WildFly Common ]]>${project.version}</doctitle>
                     <header><![CDATA[WildFly Common ]]>${project.version}</header>
-                    <footer><![CDATA[WildFly Common  ]]>${project.version}</footer>
-                    <bottom><![CDATA[<i>Copyright &#169; 2017 JBoss, a division of Red Hat, Inc.</i>]]></bottom>
+                    <footer><![CDATA[WildFly Common ]]>${project.version}</footer>
+                    <bottom><![CDATA[<i>Copyright &#169; 2018 JBoss, a division of Red Hat, Inc.</i>]]></bottom>
                     <links>
                         <link>http://java.sun.com/javase/8/docs/api/</link>
                     </links>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.7.0-jboss-1</version>
-                <executions>
-                    <execution>
-                        <id>default-compile</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                        <configuration>
-                            <release>8</release>
-                            <buildDirectory>${project.build.directory}</buildDirectory>
-                            <compileSourceRoots>${project.compileSourceRoots}</compileSourceRoots>
-                            <outputDirectory>${project.build.outputDirectory}</outputDirectory>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>compile-java9</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                        <configuration>
-                            <release>9</release>
-                            <buildDirectory>${project.build.directory}</buildDirectory>
-                            <compileSourceRoots>${project.basedir}/src/main/java9</compileSourceRoots>
-                            <outputDirectory>${project.build.directory}/classes/META-INF/versions/9</outputDirectory>
-                            <additionalClasspathElements>
-                                <additionalClasspathElement>${project.build.outputDirectory}</additionalClasspathElement>
-                            </additionalClasspathElements>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
-                    <trimStackTrace>false</trimStackTrace>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>default-test</id>
-                        <configuration>
-                            <classesDirectory>${project.build.directory}/classes/META-INF/versions/9</classesDirectory>
-                            <additionalClasspathElements>
-                                <additionalClasspathElement>${project.build.directory}/classes</additionalClasspathElement>
-                            </additionalClasspathElements>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-                        <manifestEntries>
-                            <Multi-Release>true</Multi-Release>
-                        </manifestEntries>
-                    </archive>
                 </configuration>
             </plugin>
             <plugin>
