@@ -46,6 +46,7 @@
         <version.org.jboss.logging.jboss-logging-tools>2.1.0.Final</version.org.jboss.logging.jboss-logging-tools>
 
         <jdk.min.version>9</jdk.min.version>
+        <javadoc.additional.params>--release=8</javadoc.additional.params>
     </properties>
 
     <dependencies>
