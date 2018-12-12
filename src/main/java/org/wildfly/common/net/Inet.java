@@ -200,11 +200,10 @@ public final class Inet {
         Assert.checkMinimumParameter("defaultPort", 1, defaultPort);
         Assert.checkMaximumParameter("defaultPort", 65535, defaultPort);
         Assert.checkNotNullParam("addressType", addressType);
-        final String uriHost = uri.getHost();
-        if (uriHost == null) {
+        final InetAddress resolved = getResolvedInetAddress(uri, addressType);
+        if (resolved == null) {
             return null;
         }
-        final InetAddress resolved = getAddressByNameAndType(uriHost, addressType);
         final int uriPort = uri.getPort();
         return uriPort != - 1 ? new InetSocketAddress(resolved, uriPort) : new InetSocketAddress(resolved, defaultPort);
     }
@@ -219,6 +218,37 @@ public final class Inet {
      */
     public static InetSocketAddress getResolved(URI uri, int defaultPort) throws UnknownHostException {
         return getResolved(uri, defaultPort, InetAddress.class);
+    }
+
+    /**
+     * Get an Internet address for a URI destination, resolving the host name if necessary.
+     *
+     * @param uri the destination URI
+     * @param <T> the type of the {@code InetAddress} to search for
+     * @return the address, or {@code null} if no authority is present in the URI
+     * @throws UnknownHostException if the URI host was existent but could not be resolved to a valid address
+     */
+    public static <T extends InetAddress> T getResolvedInetAddress(URI uri, Class<T> addressType) throws UnknownHostException {
+        final String uriHost = uri.getHost();
+        if (uriHost == null) {
+            return null;
+        }
+        final int length = uriHost.length();
+        if (length == 0) {
+            return null;
+        }
+        return getAddressByNameAndType(uriHost, addressType);
+    }
+
+    /**
+     * Get an Internet address for a URI destination, resolving the host name if necessary.
+     *
+     * @param uri the destination URI
+     * @return the address, or {@code null} if no authority is present in the URI
+     * @throws UnknownHostException if the URI host was existent but could not be resolved to a valid address
+     */
+    public static InetAddress getResolvedInetAddress(URI uri) throws UnknownHostException {
+        return getResolvedInetAddress(uri, InetAddress.class);
     }
 
     /**
