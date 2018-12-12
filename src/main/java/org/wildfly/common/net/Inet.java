@@ -176,8 +176,20 @@ public final class Inet {
      * @return the host name, or {@code null} if the address has no host name and is unresolved
      */
     public static String getHostNameIfResolved(InetAddress inetAddress) {
-        final String hostString = new InetSocketAddress(inetAddress, 0).getHostString();
-        final String toString = inetAddress.toString();
+        Assert.checkNotNullParam("inetAddress", inetAddress);
+        return getHostNameIfResolved(new InetSocketAddress(inetAddress, 0));
+    }
+
+    /**
+     * Get the host name of the given address, if it is resolved.  Otherwise, return {@code null}.
+     *
+     * @param socketAddress the socket address to check (must not be {@code null})
+     * @return the host name, or {@code null} if the address has no host name and is unresolved
+     */
+    public static String getHostNameIfResolved(InetSocketAddress socketAddress) {
+        Assert.checkNotNullParam("socketAddress", socketAddress);
+        final String hostString = socketAddress.getHostString();
+        final String toString = socketAddress.toString();
         final int slash = toString.lastIndexOf('/');
         if (slash == 0) {
             // it might be unresolved or it might explicitly be ""
