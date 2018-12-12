@@ -28,6 +28,7 @@ import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.security.PrivilegedAction;
@@ -948,6 +949,24 @@ public final class Inet {
             return null;
         });
         return address == null ? 0 : address.getScopeId();
+    }
+
+    /**
+     * Extract a base URI from the given scheme and socket address.  The address is not resolved.
+     *
+     * @param scheme the URI scheme
+     * @param socketAddress the host socket address
+     * @param defaultPort the protocol default port, or -1 if there is none
+     * @return the URI instance
+     * @throws URISyntaxException if the URI failed to be constructed for some reason
+     */
+    public static URI getURIFromAddress(String scheme, InetSocketAddress socketAddress, int defaultPort) throws URISyntaxException {
+        String host = getHostNameIfResolved(socketAddress);
+        if (isInet6Address(host)) {
+            host = '[' + host + ']';
+        }
+        final int port = socketAddress.getPort();
+        return new URI(scheme, null, host, port == defaultPort ? -1 : port, null, null, null);
     }
 
     private static byte parseDecimal(String number) {
