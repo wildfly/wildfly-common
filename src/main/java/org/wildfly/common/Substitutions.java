@@ -62,14 +62,14 @@ final class Substitutions {
     @TargetClass(className = "org.graalvm.compiler.api.directives.GraalDirectives")
     static final class Target_GraalDirectives {
         @Alias
-        public static final double LIKELY_PROBABILITY = 0.75;
+        public static double LIKELY_PROBABILITY;
         @Alias
-        public static final double UNLIKELY_PROBABILITY = 1.0 - LIKELY_PROBABILITY;
+        public static double UNLIKELY_PROBABILITY;
 
         @Alias
-        public static final double SLOWPATH_PROBABILITY = 0.0001;
+        public static double SLOWPATH_PROBABILITY;
         @Alias
-        public static final double FASTPATH_PROBABILITY = 1.0 - SLOWPATH_PROBABILITY;
+        public static double FASTPATH_PROBABILITY;
 
         @Alias
         public static boolean injectBranchProbability(double probability, boolean condition) {
