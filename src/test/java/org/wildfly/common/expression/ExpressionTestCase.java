@@ -19,6 +19,7 @@
 package org.wildfly.common.expression;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
@@ -536,6 +537,16 @@ public class ExpressionTestCase {
         final Expression expression = Expression.compile("W:\\\\workspace\\\\some-path\\\\xxxxyyyy", Expression.Flag.ESCAPES);
         assertEquals("W:\\workspace\\some-path\\xxxxyyyy", expression.evaluate((c, b) -> {
             fail("unexpected expansion");
+        }));
+    }
+
+    @Test
+    public void testPoint46() throws Exception {
+        // an empty default value is valid
+        final Expression expression = Expression.compile("${foo.bar:}");
+        assertEquals("Should expand to empty string", "", expression.evaluate((c, b) -> {
+            assertTrue(c.hasDefault());
+            assertEquals("", c.getExpandedDefault());
         }));
     }
 }

@@ -544,7 +544,8 @@ public final class Expression {
                     } else if (endOnBrace) {
                         // TP 30
                         itr.prev(); // back up to point at } again
-                        if (idx > start) {
+                        // TP 46 // allow an empty default value
+                        if (idx >= start) {
                             list.add(new LiteralNode(itr.getStr(), start, idx));
                         }
                         return Node.fromList(list);
