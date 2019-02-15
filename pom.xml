@@ -30,7 +30,7 @@
     <parent>
         <groupId>org.jboss</groupId>
         <artifactId>jboss-parent-mr-jar</artifactId>
-        <version>30</version>
+        <version>32</version>
     </parent>
 
     <licenses>
@@ -45,7 +45,7 @@
         <version.org.jboss.logging.jboss-logging>3.3.1.Final</version.org.jboss.logging.jboss-logging>
         <version.org.jboss.logging.jboss-logging-tools>2.1.0.Final</version.org.jboss.logging.jboss-logging-tools>
 
-        <jdk.min.version>9</jdk.min.version>
+        <jdk.min.version>11</jdk.min.version>
         <javadoc.additional.params>--release=8</javadoc.additional.params>
     </properties>
 
