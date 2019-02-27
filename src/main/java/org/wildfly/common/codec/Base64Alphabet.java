@@ -89,4 +89,87 @@ public abstract class Base64Alphabet extends Alphabet {
             }
         }
     };
+
+    /**
+     * The modular crypt alphabet, used in various modular crypt password types.
+     */
+    public static final Base64Alphabet MOD_CRYPT = new ModCryptBase64Alphabet(false);
+
+    /**
+     * The modular crypt alphabet, used in various modular crypt password types.
+     */
+    public static final Base64Alphabet MOD_CRYPT_LE = new ModCryptBase64Alphabet(true);
+
+    /**
+     * The BCrypt alphabet.
+     */
+    public static final Base64Alphabet BCRYPT = new Base64Alphabet(false) {
+        public int encode(final int val) {
+            if (val == 0) {
+                return '.';
+            } else if (val == 1) {
+                return '/';
+            } else if (val <= 27) {
+                return 'A' + val - 2;
+            } else if (val <= 53) {
+                return 'a' + val - 28;
+            } else {
+                assert val < 64;
+                return '0' + val - 54;
+            }
+        }
+
+        public int decode(final int codePoint) {
+            if (codePoint == '.') {
+                return 0;
+            } else if (codePoint == '/') {
+                return 1;
+            } else if ('A' <= codePoint && codePoint <= 'Z') {
+                return codePoint - 'A' + 2;
+            } else if ('a' <= codePoint && codePoint <= 'z') {
+                return codePoint - 'a' + 28;
+            } else if ('0' <= codePoint && codePoint <= '9') {
+                return codePoint - '0' + 54;
+            } else {
+                return -1;
+            }
+        }
+    };
+
+    static class ModCryptBase64Alphabet extends Base64Alphabet {
+        ModCryptBase64Alphabet(final boolean littleEndian) {
+            super(littleEndian);
+        }
+
+        public int encode(final int val) {
+            if (val == 0) {
+                return '.';
+            } else if (val == 1) {
+                return '/';
+            } else if (val <= 11) {
+                return '0' + val - 2;
+            } else if (val <= 37) {
+                return 'A' + val - 12;
+            } else {
+                assert val < 64;
+                return 'a' + val - 38;
+            }
+        }
+
+        public int decode(final int codePoint) throws IllegalArgumentException {
+            if (codePoint == '.') {
+                return 0;
+            } else if (codePoint == '/') {
+                return 1;
+            } else if ('0' <= codePoint && codePoint <= '9') {
+                return codePoint - '0' + 2;
+            } else if ('A' <= codePoint && codePoint <= 'Z') {
+                return codePoint - 'A' + 12;
+            } else if ('a' <= codePoint && codePoint <= 'z') {
+                return codePoint - 'a' + 38;
+            } else {
+                return -1;
+            }
+        }
+    }
 }
