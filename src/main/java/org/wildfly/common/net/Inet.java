@@ -26,7 +26,9 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
+import java.net.ProtocolFamily;
 import java.net.SocketException;
+import java.net.StandardProtocolFamily;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
@@ -967,6 +969,17 @@ public final class Inet {
         }
         final int port = socketAddress.getPort();
         return new URI(scheme, null, host, port == defaultPort ? -1 : port, null, null, null);
+    }
+
+    /**
+     * Get the protocol family of the given Internet address.
+     *
+     * @param inetAddress the address (must not be {@code null})
+     * @return the protocol family (not {@code null})
+     */
+    public static ProtocolFamily getProtocolFamily(InetAddress inetAddress) {
+        Assert.checkNotNullParam("inetAddress", inetAddress);
+        return inetAddress instanceof Inet6Address ? StandardProtocolFamily.INET6 : StandardProtocolFamily.INET;
     }
 
     private static byte parseDecimal(String number) {
