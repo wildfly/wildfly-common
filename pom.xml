@@ -118,9 +118,9 @@
                     <doctitle><![CDATA[WildFly Common ]]>${project.version}</doctitle>
                     <header><![CDATA[WildFly Common ]]>${project.version}</header>
                     <footer><![CDATA[WildFly Common ]]>${project.version}</footer>
-                    <bottom><![CDATA[<i>Copyright &#169; 2018 JBoss, a division of Red Hat, Inc.</i>]]></bottom>
+                    <bottom><![CDATA[<i>Copyright &#169; 2019 JBoss, a division of Red Hat, Inc.</i>]]></bottom>
                     <links>
-                        <link>http://java.sun.com/javase/8/docs/api/</link>
+                        <link>https://docs.oracle.com/javase/8/docs/api/</link>
                     </links>
                     <doclint>none</doclint>
                     <additionalDependencies>
