@@ -36,7 +36,7 @@ import org.wildfly.common.Assert;
  */
 public class SpinLock implements ExtendedLock {
     private static final long ownerOffset;
-    private static final int spinLimit;
+    private static final int defaultSpinLimit;
 
     static {
         try {
@@ -44,7 +44,7 @@ public class SpinLock implements ExtendedLock {
         } catch (NoSuchFieldException e) {
             throw new NoSuchFieldError(e.getMessage());
         }
-        spinLimit = AccessController.doPrivileged(
+        defaultSpinLimit = AccessController.doPrivileged(
             (PrivilegedAction<Integer>) () -> Integer.valueOf(
                 System.getProperty("jboss.spin-lock.limit", "5000")
             )
@@ -56,10 +56,24 @@ public class SpinLock implements ExtendedLock {
 
     private int level;
 
+    private final int spinLimit;
+
     /**
      * Construct a new instance.
      */
-    public SpinLock() {}
+    public SpinLock() {
+        this(defaultSpinLimit);
+    }
+
+    /**
+     * Construct a new instance with the given spin limit.
+     *
+     * @param spinLimit the spin limit to use for this instance
+     */
+    public SpinLock(final int spinLimit) {
+        Assert.checkMinimumParameter("spinLimit", 0, spinLimit);
+        this.spinLimit = spinLimit;
+    }
 
     /**
      * Determine if this spin lock is held.  Useful for assertions.
