@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 
 import org.wildfly.common.Assert;
+import org.wildfly.common.cpu.ProcessorInfo;
 
 /**
  * A spin lock.  Such locks are designed to only be held for a <em>very</em> short time - for example, long enough to compare and
@@ -46,7 +47,7 @@ public class SpinLock implements ExtendedLock {
         }
         defaultSpinLimit = AccessController.doPrivileged(
             (PrivilegedAction<Integer>) () -> Integer.valueOf(
-                System.getProperty("jboss.spin-lock.limit", "5000")
+                System.getProperty("jboss.spin-lock.limit", ProcessorInfo.availableProcessors() == 1 ? "0" : "5000")
             )
         ).intValue();
     }
