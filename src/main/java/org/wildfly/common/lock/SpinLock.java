@@ -20,10 +20,13 @@ package org.wildfly.common.lock;
 
 import static org.wildfly.common.lock.JDKSpecific.unsafe;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 
 import org.wildfly.common.Assert;
+import org.wildfly.common.cpu.ProcessorInfo;
 
 /**
  * A spin lock.  Such locks are designed to only be held for a <em>very</em> short time - for example, long enough to compare and
@@ -34,6 +37,7 @@ import org.wildfly.common.Assert;
  */
 public class SpinLock implements ExtendedLock {
     private static final long ownerOffset;
+    private static final int defaultSpinLimit;
 
     static {
         try {
@@ -41,6 +45,11 @@ public class SpinLock implements ExtendedLock {
         } catch (NoSuchFieldException e) {
             throw new NoSuchFieldError(e.getMessage());
         }
+        defaultSpinLimit = AccessController.doPrivileged(
+            (PrivilegedAction<Integer>) () -> Integer.valueOf(
+                System.getProperty("jboss.spin-lock.limit", ProcessorInfo.availableProcessors() == 1 ? "0" : "5000")
+            )
+        ).intValue();
     }
 
     @SuppressWarnings("unused")
@@ -48,10 +57,24 @@ public class SpinLock implements ExtendedLock {
 
     private int level;
 
+    private final int spinLimit;
+
     /**
      * Construct a new instance.
      */
-    public SpinLock() {}
+    public SpinLock() {
+        this(defaultSpinLimit);
+    }
+
+    /**
+     * Construct a new instance with the given spin limit.
+     *
+     * @param spinLimit the spin limit to use for this instance
+     */
+    public SpinLock(final int spinLimit) {
+        Assert.checkMinimumParameter("spinLimit", 0, spinLimit);
+        this.spinLimit = spinLimit;
+    }
 
     /**
      * Determine if this spin lock is held.  Useful for assertions.
@@ -94,7 +117,7 @@ public class SpinLock implements ExtendedLock {
             } else if (owner == null && unsafe.compareAndSwapObject(this, ownerOffset, null, Thread.currentThread())) {
                 level = 1;
                 return;
-            } else if (spins >= 1_000) {
+            } else if (spins >= spinLimit) {
                 Thread.yield();
             } else {
                 JDKSpecific.onSpinWait();
@@ -120,7 +143,7 @@ public class SpinLock implements ExtendedLock {
             } else if (owner == null && unsafe.compareAndSwapObject(this, ownerOffset, null, Thread.currentThread())) {
                 level = 1;
                 return;
-            } else if (spins >= 1_000) {
+            } else if (spins >= spinLimit) {
                 Thread.yield();
             } else {
                 JDKSpecific.onSpinWait();
