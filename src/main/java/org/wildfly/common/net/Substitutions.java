@@ -24,6 +24,8 @@ import java.util.List;
 
 import com.oracle.svm.core.annotate.Substitute;
 import com.oracle.svm.core.annotate.TargetClass;
+
+import org.graalvm.nativeimage.Platform;
 import org.graalvm.nativeimage.StackValue;
 import org.graalvm.nativeimage.c.CContext;
 import org.graalvm.nativeimage.c.function.CFunction;
@@ -109,6 +111,9 @@ final class Substitutions {
 
     static final class NativeInfoDirectives implements CContext.Directives {
         public List<String> getHeaderFiles() {
+            if (Platform.includedIn(Platform.WINDOWS.class)) {
+                return Collections.singletonList("<winsock.h>");
+            }
             return Collections.singletonList("<unistd.h>");
         }
     }
