@@ -113,6 +113,9 @@ final class Substitutions {
 
     static final class NativeInfoDirectives implements CContext.Directives {
         public List<String> getHeaderFiles() {
+            if (Platform.includedIn(Platform.WINDOWS.class)) {
+                return Collections.singletonList("<winsock.h>");
+            }
             return Collections.singletonList("<unistd.h>");
         }
     }
