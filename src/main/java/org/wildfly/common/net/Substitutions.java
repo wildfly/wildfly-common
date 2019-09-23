@@ -24,6 +24,8 @@ import java.util.List;
 
 import com.oracle.svm.core.annotate.Substitute;
 import com.oracle.svm.core.annotate.TargetClass;
+import org.graalvm.nativeimage.Platform;
+import org.graalvm.nativeimage.Platforms;
 import org.graalvm.nativeimage.StackValue;
 import org.graalvm.nativeimage.c.CContext;
 import org.graalvm.nativeimage.c.function.CFunction;
@@ -36,6 +38,7 @@ import org.graalvm.word.WordFactory;
  */
 final class Substitutions {
     @TargetClass(className = "org.wildfly.common.net.GetHostInfoAction")
+    @Platforms({Platform.DARWIN.class, Platform.LINUX.class})
     static final class Target_org_wildfly_common_net_GetHostInfoAction {
         @Substitute
         public String[] run() {
@@ -102,6 +105,7 @@ final class Substitutions {
     }
 
     @CContext(NativeInfoDirectives.class)
+    @Platforms({Platform.DARWIN.class, Platform.LINUX.class})
     static final class NativeInfo {
         @CFunction
         static native int gethostname(CCharPointer nameBuf, UnsignedWord /* size_t */ len);
