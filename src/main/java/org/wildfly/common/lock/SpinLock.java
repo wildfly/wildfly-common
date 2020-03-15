@@ -107,23 +107,21 @@ public class SpinLock implements ExtendedLock {
      * Acquire the lock by spinning until it is held.
      */
     public void lock() {
-        Thread owner;
-        int spins = 0;
-        for (;;) {
-            owner = this.owner;
-            if (owner == Thread.currentThread()) {
-                level++;
-                return;
-            } else if (owner == null && unsafe.compareAndSwapObject(this, ownerOffset, null, Thread.currentThread())) {
-                level = 1;
-                return;
-            } else if (spins >= spinLimit) {
+        Thread current = Thread.currentThread();
+        if (this.owner == current) {
+            level++;
+            return;
+        }
+        int spins = spinLimit;
+        while (!unsafe.compareAndSwapObject(this, ownerOffset, null, current)) {
+            if (spins == 0) {
                 Thread.yield();
             } else {
                 JDKSpecific.onSpinWait();
-                spins++;
+                spins--;
             }
         }
+        level = 1;
     }
 
     /**
@@ -132,24 +130,23 @@ public class SpinLock implements ExtendedLock {
      * @throws InterruptedException if the thread is interrupted before the lock can be acquired
      */
     public void lockInterruptibly() throws InterruptedException {
-        Thread owner;
-        int spins = 0;
-        for (;;) {
+        if (Thread.interrupted()) throw new InterruptedException();
+        Thread current = Thread.currentThread();
+        if (this.owner == current) {
+            level++;
+            return;
+        }
+        int spins = spinLimit;
+        while (!unsafe.compareAndSwapObject(this, ownerOffset, null, current)) {
             if (Thread.interrupted()) throw new InterruptedException();
-            owner = this.owner;
-            if (owner == Thread.currentThread()) {
-                level++;
-                return;
-            } else if (owner == null && unsafe.compareAndSwapObject(this, ownerOffset, null, Thread.currentThread())) {
-                level = 1;
-                return;
-            } else if (spins >= spinLimit) {
+            if (spins == 0) {
                 Thread.yield();
             } else {
                 JDKSpecific.onSpinWait();
-                spins++;
+                spins--;
             }
         }
+        level = 1;
     }
 
     /**
@@ -158,11 +155,10 @@ public class SpinLock implements ExtendedLock {
      * @return {@code true} if the lock was acquired, {@code false} otherwise
      */
     public boolean tryLock() {
-        Thread owner = this.owner;
         if (owner == Thread.currentThread()) {
             level++;
             return true;
-        } else if (owner == null && unsafe.compareAndSwapObject(this, ownerOffset, null, Thread.currentThread())) {
+        } else if (unsafe.compareAndSwapObject(this, ownerOffset, null, Thread.currentThread())) {
             level = 1;
             return true;
         } else {
@@ -176,7 +172,6 @@ public class SpinLock implements ExtendedLock {
      * @throws IllegalMonitorStateException if the lock is not held by the current thread
      */
     public void unlock() {
-        Thread owner = this.owner;
         if (owner == Thread.currentThread()) {
             if (--level == 0) this.owner = null;
         } else {
