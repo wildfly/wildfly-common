@@ -5,6 +5,7 @@
 target
 # ignore downloaded maven
 tools/maven
+documentation/
 # ignore eclipse files
 .project
 .classpath
@@ -13,6 +14,7 @@ tools/maven
 # ignore m2e annotation processing files
 .factorypath
 # ignore IDEA files
+solutions/
 *.iml
 *.ipr
 *.iws
