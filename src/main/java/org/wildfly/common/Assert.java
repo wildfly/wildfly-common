@@ -20,6 +20,8 @@ package org.wildfly.common;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 import org.wildfly.common._private.CommonMessages;
 import org.wildfly.common.annotation.NotNull;
@@ -530,6 +532,74 @@ public final class Assert {
     @SuppressWarnings("ConstantConditions")
     public static boolean assertFalse(boolean expr) {
         assert ! expr : CommonMessages.msg.expectedBoolean(expr);
+        return expr;
+    }
+
+    /**
+     * Evaluate that the given {@code Boolean} is {@code true}.
+     * Method is equivalent to {@code Boolean.parseBoolean} behavior.
+     *
+     * @param expr the boolean expression
+     * @return the boolean expression
+     */
+    public static boolean isTrue(Boolean expr) {
+        return Boolean.TRUE.equals(expr);
+    }
+
+    /**
+     * Evaluate that the given {@code Optional} and check if it's {@code true}.
+     * Method is equivalent to {@code Boolean.parseBoolean} behavior.
+     *
+     * @param expr the {@code Optional} providing the Boolean
+     * @return the boolean expression
+     */
+    public static boolean isTrue(Optional<Boolean> expr) {
+        if (expr == null || !expr.isPresent()) {
+            return false;
+        }
+        return expr.get().booleanValue();
+    }
+
+    /**
+     * Evaluate that the given {@code Supplier} and check if it's {@code true}.
+     * Method is equivalent to {@code Boolean.parseBoolean} behavior.
+     *
+     * @param expr the {@code Supplier} providing the Boolean
+     * @return the boolean expression
+     */
+    public static boolean isTrue(Supplier<Boolean> expr) {
+        if (expr == null || expr.get() == null) {
+            return false;
+        }
+        return expr.get().booleanValue();
+    }
+
+    /**
+     * Evaluate that the given {@code Object} and check if it's {@code true}.
+     * Method is equivalent to {@code Boolean.parseBoolean} behavior.
+     *
+     * @param expr the boolean expression
+     * @return the boolean expression
+     */
+    public static boolean isTrue(Object expr) {
+        if (expr == null) {
+            return false;
+        }
+        if (expr instanceof Boolean) {
+            return ((Boolean) expr).booleanValue();
+        }
+        return Boolean.parseBoolean(String.valueOf(expr));
+    }
+
+    /**
+     * Evaluate that the given expression is {@code true}.
+     * Method exists to avoid unnecessary Boolean object creation.
+     *
+     * @param expr the boolean expression
+     * @return the boolean expression
+     */
+    @SuppressWarnings("ConstantConditions")
+    public static boolean isTrue(boolean expr) {
         return expr;
     }
 
