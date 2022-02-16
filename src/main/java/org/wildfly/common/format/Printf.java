@@ -440,7 +440,7 @@ public class Printf {
                 throw unknownFormat(format, i);
             }
             // basic format specifiers
-            if (cp != 'n') {
+            if (cp != 'n' && cp != '%') {
                 // capture argument
                 if (argIdx != -1) {
                     if (argIdx - 1 >= params.length) {
