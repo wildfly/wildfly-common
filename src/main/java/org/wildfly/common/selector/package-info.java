@@ -19,6 +19,7 @@
 /**
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
  *
- * @deprecated Use {@link org.wildfly.common.context.Contextual} instead.
+ * <p>Deprecated Use {@link org.wildfly.common.context.Contextual} instead.</p>
  */
 package org.wildfly.common.selector;
+

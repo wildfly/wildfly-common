@@ -34,7 +34,7 @@ public class CompositeIterator<E> implements Iterator<E> {
 
     /**
      * Constructs a new composite iterator.
-     * @param iterables a series of iterators
+     * @param iterators a series of iterators
      */
     @SafeVarargs
     public CompositeIterator(Iterator<? extends E>... iterators) {
@@ -43,7 +43,7 @@ public class CompositeIterator<E> implements Iterator<E> {
 
     /**
      * Constructs a new composite iterator.
-     * @param iterables a series of iterators
+     * @param iterators a series of iterators
      */
     public CompositeIterator(Iterable<? extends Iterator<? extends E>> iterators) {
         this.iterators = iterators;
