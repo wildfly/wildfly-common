@@ -174,4 +174,6 @@ public interface CommonMessages {
 
     // 3000-3099 reserved for reference queue logging (see {@link org.wildfly.common.ref.Log})
 
+    // 3100-3199 reserved for xml factory logging (see {@link org.wildfly.common.xml.Log})
+
 }
