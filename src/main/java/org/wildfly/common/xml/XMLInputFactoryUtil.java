@@ -21,6 +21,8 @@ import javax.xml.stream.XMLInputFactory;
 
 import org.wildfly.common.annotation.NotNull;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * Factory provides {@link XMLInputFactory} with secure defaults set. Properties not supported generate a warning, but the
  * factory process creation will continue and return a result.
@@ -43,7 +45,7 @@ public final class XMLInputFactoryUtil {
     /*
      * Prevent recurring log messages (per classloader).
      */
-    private static volatile boolean TO_BE_LOGGED = true;
+    private static final AtomicBoolean TO_BE_LOGGED = new AtomicBoolean(true);
 
     /**
      * Factory generated with secure defaults.
@@ -52,11 +54,12 @@ public final class XMLInputFactoryUtil {
     @NotNull
     public static XMLInputFactory create() {
         final XMLInputFactory instance = XMLInputFactory.newInstance();
+        final boolean toBeLogged = TO_BE_LOGGED.compareAndSet(true, false);
 
         try {
             instance.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);
         } catch (IllegalArgumentException e) {
-            if (TO_BE_LOGGED) {
+            if (toBeLogged) {
                 XML_FACTORY_LOGGER.xmlFactoryPropertyNotSupported(e, XMLInputFactory.SUPPORT_DTD,
                         instance.getClass().getCanonicalName());
             }
@@ -65,13 +68,11 @@ public final class XMLInputFactoryUtil {
         try {
             instance.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
         } catch (IllegalArgumentException e) {
-            if (TO_BE_LOGGED) {
+            if (toBeLogged) {
                 XML_FACTORY_LOGGER.xmlFactoryPropertyNotSupported(e, XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES,
                         instance.getClass().getCanonicalName());
             }
         }
-
-        TO_BE_LOGGED = false;
 
         return instance;
     }

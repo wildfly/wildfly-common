@@ -25,6 +25,7 @@ import static org.wildfly.common.xml.Log.XML_FACTORY_LOGGER;
 import javax.xml.XMLConstants;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerFactory;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Factory provides {@link TransformerFactory} with secure defaults set. Properties not supported generate a warning, but the
@@ -49,16 +50,17 @@ public final class TransformerFactoryUtil {
     /*
      * Prevent recurring log messages (per classloader).
      */
-    private static volatile boolean TO_BE_LOGGED = true;
+    private static final AtomicBoolean TO_BE_LOGGED = new AtomicBoolean(true);
 
     @NotNull
     public static TransformerFactory create() {
         final TransformerFactory instance = TransformerFactory.newInstance();
+        final boolean toBeLogged = TO_BE_LOGGED.compareAndSet(true, false);
 
         try {
             instance.setFeature(FEATURE_SECURE_PROCESSING, true);
         } catch (TransformerConfigurationException e) {
-            if (TO_BE_LOGGED) {
+            if (toBeLogged) {
                 XML_FACTORY_LOGGER.xmlFactoryPropertyNotSupported(e, FEATURE_SECURE_PROCESSING,
                         instance.getClass().getCanonicalName());
             }
@@ -67,7 +69,7 @@ public final class TransformerFactoryUtil {
         try {
             instance.setAttribute(ACCESS_EXTERNAL_DTD, "");
         } catch (IllegalArgumentException e) {
-            if (TO_BE_LOGGED) {
+            if (toBeLogged) {
                 XML_FACTORY_LOGGER.xmlFactoryPropertyNotSupported(e, ACCESS_EXTERNAL_DTD,
                         instance.getClass().getCanonicalName());
             }
@@ -76,13 +78,11 @@ public final class TransformerFactoryUtil {
         try {
             instance.setAttribute(ACCESS_EXTERNAL_STYLESHEET, "");
         } catch (IllegalArgumentException e) {
-            if (TO_BE_LOGGED) {
+            if (toBeLogged) {
                 XML_FACTORY_LOGGER.xmlFactoryPropertyNotSupported(e, ACCESS_EXTERNAL_STYLESHEET,
                         instance.getClass().getCanonicalName());
             }
         }
-
-        TO_BE_LOGGED = false;
 
         return instance;
     }

@@ -28,6 +28,8 @@ import org.xml.sax.SAXNotSupportedException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * Factory provides {@link XMLReaderFactory} with secure defaults set. Properties not supported generate a warning, but the
  * factory process creation will continue and return a result.
@@ -52,7 +54,7 @@ public final class XMLReaderFactoryUtil {
     /*
      * Prevent recurring log messages (per classloader).
      */
-    private static volatile boolean TO_BE_LOGGED = true;
+    private static final AtomicBoolean TO_BE_LOGGED = new AtomicBoolean(true);
 
     /**
      * Factory generated with secure defaults.
@@ -61,11 +63,12 @@ public final class XMLReaderFactoryUtil {
     @NotNull
     public static XMLReader create() throws SAXException {
         final XMLReader instance = XMLReaderFactory.createXMLReader();
+        final boolean toBeLogged = TO_BE_LOGGED.compareAndSet(true, false);
 
         try {
             instance.setFeature(APACHE_DISALLOW_DOCTYPE_DECL, true);
         } catch (SAXNotRecognizedException | SAXNotSupportedException e) {
-            if (TO_BE_LOGGED) {
+            if (toBeLogged) {
                 XML_FACTORY_LOGGER.xmlFactoryPropertyNotSupported(e, APACHE_DISALLOW_DOCTYPE_DECL,
                         instance.getClass().getCanonicalName());
             }
@@ -74,7 +77,7 @@ public final class XMLReaderFactoryUtil {
         try {
             instance.setFeature(APACHE_LOAD_EXTERNAL_DTD, false);
         } catch (SAXNotRecognizedException | SAXNotSupportedException e) {
-            if (TO_BE_LOGGED) {
+            if (toBeLogged) {
                 XML_FACTORY_LOGGER.xmlFactoryPropertyNotSupported(e, APACHE_LOAD_EXTERNAL_DTD,
                         instance.getClass().getCanonicalName());
             }
@@ -83,7 +86,7 @@ public final class XMLReaderFactoryUtil {
         try {
             instance.setFeature(XML_EXTERNAL_GENERAL_ENTITIES, false);
         } catch (SAXNotRecognizedException | SAXNotSupportedException e) {
-            if (TO_BE_LOGGED) {
+            if (toBeLogged) {
                 XML_FACTORY_LOGGER.xmlFactoryPropertyNotSupported(e, XML_EXTERNAL_GENERAL_ENTITIES,
                         instance.getClass().getCanonicalName());
             }
@@ -92,13 +95,11 @@ public final class XMLReaderFactoryUtil {
         try {
             instance.setFeature(XML_EXTERNAL_PARAMETER_ENTITIES, false);
         } catch (SAXNotRecognizedException | SAXNotSupportedException e) {
-            if (TO_BE_LOGGED) {
+            if (toBeLogged) {
                 XML_FACTORY_LOGGER.xmlFactoryPropertyNotSupported(e, XML_EXTERNAL_PARAMETER_ENTITIES,
                         instance.getClass().getCanonicalName());
             }
         }
-
-        TO_BE_LOGGED = false;
 
         return instance;
     }

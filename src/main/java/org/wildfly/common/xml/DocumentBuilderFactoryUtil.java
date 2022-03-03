@@ -28,6 +28,8 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.wildfly.common.annotation.NotNull;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * Factory provides {@link DocumentBuilderFactory} with secure defaults set. Properties not supported generate a warning, but
  * the factory process creation will continue and return a result.
@@ -57,7 +59,7 @@ public final class DocumentBuilderFactoryUtil {
     /*
      * Prevent recurring log messages (per classloader).
      */
-    private static volatile boolean TO_BE_LOGGED = true;
+    private static final AtomicBoolean TO_BE_LOGGED = new AtomicBoolean(true);
 
     /**
      * Factory generated with secure defaults.
@@ -66,11 +68,12 @@ public final class DocumentBuilderFactoryUtil {
     @NotNull
     public static DocumentBuilderFactory create() {
         final DocumentBuilderFactory instance = DocumentBuilderFactory.newInstance();
+        final boolean toBeLogged = TO_BE_LOGGED.compareAndSet(true, false);
 
         try {
             instance.setFeature(FEATURE_SECURE_PROCESSING, true);
         } catch (ParserConfigurationException e) {
-            if (TO_BE_LOGGED) {
+            if (toBeLogged) {
                 XML_FACTORY_LOGGER.xmlFactoryPropertyNotSupported(e, FEATURE_SECURE_PROCESSING,
                         instance.getClass().getCanonicalName());
             }
@@ -79,7 +82,7 @@ public final class DocumentBuilderFactoryUtil {
         try {
             instance.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
         } catch (IllegalArgumentException e) {
-            if (TO_BE_LOGGED) {
+            if (toBeLogged) {
                 XML_FACTORY_LOGGER.xmlFactoryPropertyNotSupported(e, XMLConstants.ACCESS_EXTERNAL_DTD,
                         instance.getClass().getCanonicalName());
             }
@@ -88,7 +91,7 @@ public final class DocumentBuilderFactoryUtil {
         try {
             instance.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
         } catch (IllegalArgumentException e) {
-            if (TO_BE_LOGGED) {
+            if (toBeLogged) {
                 XML_FACTORY_LOGGER.xmlFactoryPropertyNotSupported(e, XMLConstants.ACCESS_EXTERNAL_SCHEMA,
                         instance.getClass().getCanonicalName());
             }
@@ -97,7 +100,7 @@ public final class DocumentBuilderFactoryUtil {
         try {
             instance.setFeature(APACHE_DISALLOW_DOCTYPE_DECL, true);
         } catch (ParserConfigurationException e) {
-            if (TO_BE_LOGGED) {
+            if (toBeLogged) {
                 XML_FACTORY_LOGGER.xmlFactoryPropertyNotSupported(e, APACHE_DISALLOW_DOCTYPE_DECL,
                         instance.getClass().getCanonicalName());
             }
@@ -106,7 +109,7 @@ public final class DocumentBuilderFactoryUtil {
         try {
             instance.setFeature(APACHE_LOAD_EXTERNAL_DTD, false);
         } catch (ParserConfigurationException e) {
-            if (TO_BE_LOGGED) {
+            if (toBeLogged) {
                 XML_FACTORY_LOGGER.xmlFactoryPropertyNotSupported(e, APACHE_LOAD_EXTERNAL_DTD,
                         instance.getClass().getCanonicalName());
             }
@@ -115,7 +118,7 @@ public final class DocumentBuilderFactoryUtil {
         try {
             instance.setFeature(XML_EXTERNAL_GENERAL_ENTITIES, false);
         } catch (ParserConfigurationException e) {
-            if (TO_BE_LOGGED) {
+            if (toBeLogged) {
                 XML_FACTORY_LOGGER.xmlFactoryPropertyNotSupported(e, XML_EXTERNAL_GENERAL_ENTITIES,
                         instance.getClass().getCanonicalName());
             }
@@ -124,7 +127,7 @@ public final class DocumentBuilderFactoryUtil {
         try {
             instance.setFeature(XML_EXTERNAL_PARAMETER_ENTITIES, false);
         } catch (ParserConfigurationException e) {
-            if (TO_BE_LOGGED) {
+            if (toBeLogged) {
                 XML_FACTORY_LOGGER.xmlFactoryPropertyNotSupported(e, XML_EXTERNAL_PARAMETER_ENTITIES,
                         instance.getClass().getCanonicalName());
             }
@@ -133,7 +136,7 @@ public final class DocumentBuilderFactoryUtil {
         try {
             instance.setXIncludeAware(false);
         } catch (Exception e) {
-            if (TO_BE_LOGGED) {
+            if (toBeLogged) {
                 XML_FACTORY_LOGGER.xmlFactoryPropertyNotSupported(e, "setXIncludeAware(false)",
                         instance.getClass().getCanonicalName());
             }
@@ -142,13 +145,11 @@ public final class DocumentBuilderFactoryUtil {
         try {
             instance.setExpandEntityReferences(false);
         } catch (Exception e) {
-            if (TO_BE_LOGGED) {
+            if (toBeLogged) {
                 XML_FACTORY_LOGGER.xmlFactoryPropertyNotSupported(e, "setExpandEntityReferences(false)",
                         instance.getClass().getCanonicalName());
             }
         }
-
-        TO_BE_LOGGED = false;
 
         return instance;
     }
