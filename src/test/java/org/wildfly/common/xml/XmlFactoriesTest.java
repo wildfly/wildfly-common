@@ -26,6 +26,10 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
+import javax.xml.xpath.XPathFactory;
 
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -74,4 +78,22 @@ public class XmlFactoriesTest {
         assertNotNull(xmlReader);
     }
 
+    @Test
+    public void testSchemaFactoryUtil() {
+        SchemaFactory schemaFactory = SchemaFactoryUtil.create();
+        assertNotNull(schemaFactory);
+    }
+
+    @Test
+    public void testXPathFactoryUtil() {
+        XPathFactory schemaFactory = XPathFactoryUtil.create();
+        assertNotNull(schemaFactory);
+    }
+
+    @Test
+    public void testValidatorUtil() throws SAXException {
+        Schema schema = SchemaFactoryUtil.create().newSchema();
+        Validator validator = ValidatorUtil.create(schema);
+        assertNotNull(validator);
+    }
 }
