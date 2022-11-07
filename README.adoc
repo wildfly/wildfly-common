@@ -1,0 +1,16 @@
+= WildFly Common
+
+Common utilities for WildFly projects.
+
+== Instructions
+
+Compile and test the project:
+
+[source,bash]
+----
+mvn verify
+----
+
+== Issue tracker
+
+https://issues.redhat.com/projects/WFCOM/summary
