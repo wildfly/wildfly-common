@@ -24,6 +24,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.jboss.logging.Logger;
 import org.wildfly.common.Assert;
 
 /**
@@ -31,6 +32,38 @@ import org.wildfly.common.Assert;
  */
 public final class Functions {
     private Functions() {}
+
+    private static final Logger LOGGER = Logger.getLogger(Functions.class);
+    private static final Function<Object, Object> IDENTITY_FUNCTION = Function.identity();
+
+    /**
+     * Returns a function that always returns its input argument.
+     * A subclass permissive variation of {@link Function#identity()}.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T extends R, R> Function<T, R> identityFunction() {
+        return (Function<T, R>) IDENTITY_FUNCTION;
+    }
+
+    private static final Consumer<AutoCloseable> CLOSING_CONSUMER = new Consumer<AutoCloseable>() {
+        @Override
+        public void accept(AutoCloseable value) {
+            try {
+                value.close();
+            } catch (Exception e) {
+                LOGGER.warn(e.getLocalizedMessage(), e);
+            }
+        }
+    };
+
+    /**
+     * Returns a consumer that quietly closes its argument, logging any exceptions.
+     * @return a closing consumer
+     */
+    @SuppressWarnings("unchecked")
+    public static <T extends AutoCloseable> Consumer<T> closingConsumer() {
+        return (Consumer<T>) CLOSING_CONSUMER;
+    }
 
     /**
      * Get the singleton consumer which accepts and runs runnable instances.
