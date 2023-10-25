@@ -82,6 +82,19 @@ public final class ContextManager<C extends Contextual<C>> implements Supplier<C
     }
 
     /**
+     * Get the global default supplier instance.
+     *
+     * @return the global default supplier, or {@code null} if none is installed or available
+     */
+    public Supplier<C> getGlobalDefaultSupplier() {
+        final SecurityManager sm = System.getSecurityManager();
+        if (sm != null) {
+            sm.checkPermission(new ContextPermission(name, ContextPermission.STR_GET_GLOBAL_DEF));
+        }
+        return globalDefaultSupplierRef.get();
+    }
+
+    /**
      * Set the global default instance supplier.  The supplier, if one is given, should have a reasonable policy such
      * that callers of {@link #getGlobalDefault()} will obtain results consistent with a general expectation of stability.
      *
@@ -148,6 +161,23 @@ public final class ContextManager<C extends Contextual<C>> implements Supplier<C
     }
 
     /**
+     * Get the class loader default supplier.\
+     *
+     * @param classLoader the class loader
+     * @return the global default, or {@code null} if none is installed or available
+     */
+    public Supplier<C> getClassLoaderDefaultSupplier(final ClassLoader classLoader) {
+        final SecurityManager sm = System.getSecurityManager();
+        if (sm != null) {
+            sm.checkPermission(new ContextPermission(name, ContextPermission.STR_GET_CLASSLOADER_DEF));
+        }
+        if (classLoader == null) {
+            return null;
+        }
+        return perClassLoaderDefault.get(classLoader);
+    }
+
+    /**
      * Set the per-class loader default instance supplier.  The supplier, if one is given, should have a reasonable policy such
      * that callers of {@link #getClassLoaderDefault(ClassLoader)} will obtain results consistent with a general expectation of stability.
      *
@@ -200,6 +230,19 @@ public final class ContextManager<C extends Contextual<C>> implements Supplier<C
         }
         final Supplier<C> defaultSupplier = stateRef.get().defaultSupplier;
         return defaultSupplier == null ? null : defaultSupplier.get();
+    }
+
+    /**
+     * Get the per-thread default context instance.
+     *
+     * @return the per-thread default supplier, or {@code null} if none is installed or available
+     */
+    public Supplier<C> getThreadDefaultSupplier() {
+        final SecurityManager sm = System.getSecurityManager();
+        if (sm != null) {
+            sm.checkPermission(new ContextPermission(name, ContextPermission.STR_GET_THREAD_DEF));
+        }
+        return stateRef.get().defaultSupplier;
     }
 
     /**
