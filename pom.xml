@@ -87,7 +87,7 @@
             <!-- This dependency is just for javadoc -->
             <groupId>javax.annotation</groupId>
             <artifactId>javax.annotation-api</artifactId>
-            <version>1.3</version>
+            <version>1.3.2</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
