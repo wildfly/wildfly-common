@@ -46,7 +46,6 @@
         <version.org.jboss.logging.jboss-logging-tools>2.2.1.Final</version.org.jboss.logging.jboss-logging-tools>
 
         <jdk.min.version>11</jdk.min.version>
-        <javadoc.additional.params>--release=8</javadoc.additional.params>
     </properties>
 
     <dependencies>
@@ -120,13 +119,6 @@
                     <footer><![CDATA[WildFly Common ]]>${project.version}</footer>
                     <bottom><![CDATA[<i>Copyright &#169; 2018 JBoss, a division of Red Hat, Inc.</i>]]></bottom>
                     <doclint>none</doclint>
-                    <additionalDependencies>
-                        <additionalDependency>
-                            <groupId>org.jboss</groupId>
-                            <artifactId>jdk-misc</artifactId>
-                            <version>${version.jdk-misc}</version>
-                        </additionalDependency>
-                    </additionalDependencies>
                 </configuration>
             </plugin>
             <plugin>
@@ -151,26 +143,6 @@
                         <goals>
                             <goal>manifest</goal>
                         </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>enforce-java8-tests</id>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
-                        <configuration>
-                            <rules>
-                                <requireProperty>
-                                    <property>java8.home</property>
-                                    <message>The "java8.home" property must be set on deploy to run tests under Java 8</message>
-                                </requireProperty>
-                            </rules>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
