@@ -10,24 +10,23 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        java: ['11', '17']
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 8
+    - name: Check out project
+      uses: actions/checkout@v4
+      with:
+        path: wildfly-common
+
+    - name: Set up JDKs
       uses: actions/setup-java@v3
       with:
-        java-version: '8'
         distribution: 'temurin'
         cache: maven
-    - name: Set up JDK ${{ matrix.java }}
-      uses: actions/setup-java@v3
-      with:
-        java-version: ${{ matrix.java }}
-        distribution: 'temurin'
-        cache: maven
-    - name: Build & Test with Maven on JDK ${{ matrix.java }}
-      run: mvn -B package --file pom.xml
-    - name: Test with Maven on JDK 8
-      run: mvn -B test --file pom.xml -Djava8.home="$JAVA_HOME_8_X64"
+        java-version: |
+          11
+          17
+          21
+
+    - name: Build & Test with Maven
+      run: |
+        cd wildfly-common
+        mvn -B -ntp -N install --file pom.xml -Djava11.home="${{env.JAVA_HOME_11_X64}}" -Djava17.home="${{env.JAVA_HOME_17_X64}}"
