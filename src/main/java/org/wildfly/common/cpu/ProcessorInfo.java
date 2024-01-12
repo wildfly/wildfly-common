@@ -20,12 +20,20 @@ package org.wildfly.common.cpu;
 
 /**
  * Provides general information about the processors on this host (Java 9 version).
+ *
+ * @deprecated Use {@link io.smallrye.common.cpu.ProcessorInfo} instead.
  */
+@Deprecated(forRemoval = true)
 public class ProcessorInfo {
     private ProcessorInfo() {
     }
 
+    /**
+     * {@return the number of available processors}
+     * @deprecated Use {@link io.smallrye.common.cpu.ProcessorInfo#availableProcessors()} instead.
+     */
+    @Deprecated(forRemoval = true)
     public static int availableProcessors() {
-        return Runtime.getRuntime().availableProcessors();
+        return io.smallrye.common.cpu.ProcessorInfo.availableProcessors();
     }
 }

@@ -20,18 +20,15 @@ package org.wildfly.common.cpu;
 
 /**
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
+ *
+ * @deprecated Use {@link io.smallrye.common.cpu.CacheLevelInfo} instead.
  */
+@Deprecated(forRemoval = true)
 public final class CacheLevelInfo {
-    private final int cacheLevel;
-    private final CacheType cacheType;
-    private final int cacheLevelSizeKB;
-    private final int cacheLineSize;
+    private final io.smallrye.common.cpu.CacheLevelInfo info;
 
-    CacheLevelInfo(final int cacheLevel, final CacheType cacheType, final int cacheLevelSizeKB, final int cacheLineSize) {
-        this.cacheLevel = cacheLevel;
-        this.cacheType = cacheType;
-        this.cacheLevelSizeKB = cacheLevelSizeKB;
-        this.cacheLineSize = cacheLineSize;
+    CacheLevelInfo(final io.smallrye.common.cpu.CacheLevelInfo info) {
+        this.info = info;
     }
 
     /**
@@ -41,7 +38,7 @@ public final class CacheLevelInfo {
      * @return the level index, or 0 if unknown
      */
     public int getCacheLevel() {
-        return cacheLevel;
+        return info.getCacheLevel();
     }
 
     /**
@@ -50,7 +47,7 @@ public final class CacheLevelInfo {
      * @return the type of cache (not {@code null})
      */
     public CacheType getCacheType() {
-        return cacheType;
+        return CacheType.of(info.getCacheType());
     }
 
     /**
@@ -59,7 +56,7 @@ public final class CacheLevelInfo {
      * @return the size of this cache level in kilobytes, or 0 if unknown
      */
     public int getCacheLevelSizeKB() {
-        return cacheLevelSizeKB;
+        return info.getCacheLevelSizeKB();
     }
 
     /**
@@ -68,6 +65,6 @@ public final class CacheLevelInfo {
      * @return the cache line size in bytes, or 0 if unknown
      */
     public int getCacheLineSize() {
-        return cacheLineSize;
+        return info.getCacheLineSize();
     }
 }
