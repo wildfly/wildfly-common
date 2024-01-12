@@ -18,6 +18,7 @@
 
 package org.wildfly.common.ref;
 
+import java.lang.ref.Cleaner;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,7 +27,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * A special version of {@link PhantomReference} that is strongly retained until it is reaped by the collection thread.
  *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
+ *
+ * @deprecated Use {@link Cleaner} or {@link io.smallrye.common.ref.CleanerReference} instead.
  */
+@Deprecated(forRemoval = true)
 public class CleanerReference<T, A> extends PhantomReference<T, A> {
     private static final Set<CleanerReference<?, ?>> set = Collections.newSetFromMap(new ConcurrentHashMap<CleanerReference<?, ?>, Boolean>());
 

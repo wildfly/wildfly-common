@@ -30,7 +30,10 @@ import java.lang.ref.ReferenceQueue;
  * @see java.lang.ref.PhantomReference
  *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
+ *
+ * @deprecated Use {@link io.smallrye.common.ref.PhantomReference} instead.
  */
+@Deprecated(forRemoval = true)
 public class PhantomReference<T, A> extends java.lang.ref.PhantomReference<T> implements Reference<T, A>, Reapable<T, A> {
     private final A attachment;
     private final Reaper<T, A> reaper;
