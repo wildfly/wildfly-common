@@ -48,6 +48,6 @@ final class JDKSpecific {
     }
 
     static void onSpinWait() {
-        // n/a
+        Thread.onSpinWait();
     }
 }
