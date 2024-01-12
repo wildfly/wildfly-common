@@ -50,9 +50,22 @@
     <properties>
         <version.org.jboss.logging.jboss-logging>3.5.3.Final</version.org.jboss.logging.jboss-logging>
         <version.org.jboss.logging.jboss-logging-tools>2.2.1.Final</version.org.jboss.logging.jboss-logging-tools>
+        <version.io.smallrye.common.smallrye-common>2.2.0</version.io.smallrye.common.smallrye-common>
 
         <jdk.min.version>11</jdk.min.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.smallrye.common</groupId>
+                <artifactId>smallrye-common-bom</artifactId>
+                <version>${version.io.smallrye.common.smallrye-common}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -87,6 +100,10 @@
             <version>${version.org.jboss.logging.jboss-logging}</version>
             <scope>compile</scope>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>io.smallrye.common</groupId>
+            <artifactId>smallrye-common-os</artifactId>
         </dependency>
         <dependency>
             <!-- This dependency is just for javadoc -->
