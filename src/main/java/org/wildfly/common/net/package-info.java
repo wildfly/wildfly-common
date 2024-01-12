@@ -20,6 +20,8 @@
  * Utilities relating abstractly to network-related activities.
  *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
+ *
+ * @deprecated Use {@link io.smallrye.common.net} instead.
  */
-
+@Deprecated(forRemoval = true)
 package org.wildfly.common.net;

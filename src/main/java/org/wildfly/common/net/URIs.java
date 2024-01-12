@@ -22,7 +22,10 @@ import java.net.URI;
 
 /**
  * URI-specific utilities.
+ *
+ * @deprecated Use {@link io.smallrye.common.net.URIs} instead.
  */
+@Deprecated(forRemoval = true)
 public final class URIs {
     private URIs() {}
 
@@ -31,24 +34,10 @@ public final class URIs {
      *
      * @param uri the URI
      * @return the user name, or {@code null} if the URI did not contain a recoverable user name
+     * @deprecated Use {@link io.smallrye.common.net.URIs#getUserFromURI(URI)} instead.
      */
+    @Deprecated(forRemoval = true)
     public static String getUserFromURI(URI uri) {
-        String userInfo = uri.getUserInfo();
-        if (userInfo == null && "domain".equals(uri.getScheme())) {
-            final String ssp = uri.getSchemeSpecificPart();
-            final int at = ssp.lastIndexOf('@');
-            if (at == -1) {
-                return null;
-            }
-            userInfo = ssp.substring(0, at);
-        }
-        if (userInfo != null) {
-            final int colon = userInfo.indexOf(':');
-            if (colon != -1) {
-                userInfo = userInfo.substring(0, colon);
-            }
-        }
-        return userInfo;
+        return io.smallrye.common.net.URIs.getUserFromURI(uri);
     }
-
 }

@@ -18,49 +18,41 @@
 
 package org.wildfly.common.net;
 
-import static java.lang.Integer.signum;
-import static java.lang.Math.min;
-
 import java.io.Serializable;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Arrays;
-
-import org.wildfly.common.Assert;
-import org.wildfly.common._private.CommonMessages;
-import org.wildfly.common.math.HashMath;
 
 /**
  * A Classless Inter-Domain Routing address.  This is the combination of an IP address and a netmask.
  *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
+ * @deprecated Use {@link io.smallrye.common.net.CidrAddress} instead.
  */
+@Deprecated(forRemoval = true)
 public final class CidrAddress implements Serializable, Comparable<CidrAddress> {
     private static final long serialVersionUID = - 6548529324373774149L;
 
     /**
      * The CIDR address representing all IPv4 addresses.
+     *
+     * @deprecated Use {@link io.smallrye.common.net.CidrAddress#INET4_ANY_CIDR} instead.
      */
-    public static final CidrAddress INET4_ANY_CIDR = new CidrAddress(Inet.INET4_ANY, 0);
+    @Deprecated(forRemoval = true)
+    public static final CidrAddress INET4_ANY_CIDR = new CidrAddress(io.smallrye.common.net.CidrAddress.INET4_ANY_CIDR);
 
     /**
      * The CIDR address representing all IPv6 addresses.
+     *
+     * @deprecated Use {@link io.smallrye.common.net.CidrAddress#INET6_ANY_CIDR} instead.
      */
-    public static final CidrAddress INET6_ANY_CIDR = new CidrAddress(Inet.INET6_ANY, 0);
+    @Deprecated(forRemoval = true)
+    public static final CidrAddress INET6_ANY_CIDR = new CidrAddress(io.smallrye.common.net.CidrAddress.INET6_ANY_CIDR);
 
-    private final InetAddress networkAddress;
-    private final byte[] cachedBytes;
-    private final int netmaskBits;
-    private Inet4Address broadcast;
-    private String toString;
-    private int hashCode;
+    final io.smallrye.common.net.CidrAddress cidrAddress;
 
-    private CidrAddress(final InetAddress networkAddress, final int netmaskBits) {
-        this.networkAddress = networkAddress;
-        cachedBytes = networkAddress.getAddress();
-        this.netmaskBits = netmaskBits;
+    CidrAddress(final io.smallrye.common.net.CidrAddress cidrAddress) {
+        this.cidrAddress = cidrAddress;
     }
 
     /**
@@ -69,36 +61,11 @@ public final class CidrAddress implements Serializable, Comparable<CidrAddress> 
      * @param networkAddress the network address (must not be {@code null})
      * @param netmaskBits the netmask bits (0-32 for IPv4, or 0-128 for IPv6)
      * @return the CIDR address (not {@code null})
+     * @deprecated Use {@link io.smallrye.common.net.CidrAddress#create(InetAddress, int)} instead.
      */
+    @Deprecated(forRemoval = true)
     public static CidrAddress create(InetAddress networkAddress, int netmaskBits) {
-        Assert.checkNotNullParam("networkAddress", networkAddress);
-        Assert.checkMinimumParameter("netmaskBits", 0, netmaskBits);
-        int scopeId = Inet.getScopeId(networkAddress);
-        if (networkAddress instanceof Inet4Address) {
-            Assert.checkMaximumParameter("netmaskBits", 32, netmaskBits);
-            if (netmaskBits == 0) {
-                return INET4_ANY_CIDR;
-            }
-        } else if (networkAddress instanceof Inet6Address) {
-            Assert.checkMaximumParameter("netmaskBits", 128, netmaskBits);
-            if (netmaskBits == 0 && scopeId == 0) {
-                return INET6_ANY_CIDR;
-            }
-        } else {
-            throw Assert.unreachableCode();
-        }
-        final byte[] bytes = networkAddress.getAddress();
-        maskBits0(bytes, netmaskBits);
-        String name = Inet.toOptimalString(bytes);
-        try {
-            if (bytes.length == 4) {
-                return new CidrAddress(InetAddress.getByAddress(name, bytes), netmaskBits);
-            } else {
-                return new CidrAddress(Inet6Address.getByAddress(name, bytes, scopeId), netmaskBits);
-            }
-        } catch (UnknownHostException e) {
-            throw Assert.unreachableCode();
-        }
+        return new CidrAddress(io.smallrye.common.net.CidrAddress.create(networkAddress, netmaskBits));
     }
 
     /**
@@ -107,36 +74,11 @@ public final class CidrAddress implements Serializable, Comparable<CidrAddress> 
      * @param addressBytes the network address bytes (must not be {@code null}, must be 4 bytes for IPv4 or 16 bytes for IPv6)
      * @param netmaskBits the netmask bits (0-32 for IPv4, or 0-128 for IPv6)
      * @return the CIDR address (not {@code null})
+     * @deprecated Use {@link io.smallrye.common.net.CidrAddress#create(byte[], int)} instead.
      */
+    @Deprecated(forRemoval = true)
     public static CidrAddress create(byte[] addressBytes, int netmaskBits) {
-        return create(addressBytes, netmaskBits, true);
-    }
-
-    static CidrAddress create(byte[] addressBytes, int netmaskBits, boolean clone) {
-        Assert.checkNotNullParam("networkAddress", addressBytes);
-        Assert.checkMinimumParameter("netmaskBits", 0, netmaskBits);
-        final int length = addressBytes.length;
-        if (length == 4) {
-            Assert.checkMaximumParameter("netmaskBits", 32, netmaskBits);
-            if (netmaskBits == 0) {
-                return INET4_ANY_CIDR;
-            }
-        } else if (length == 16) {
-            Assert.checkMaximumParameter("netmaskBits", 128, netmaskBits);
-            if (netmaskBits == 0) {
-                return INET6_ANY_CIDR;
-            }
-        } else {
-            throw CommonMessages.msg.invalidAddressBytes(length);
-        }
-        final byte[] bytes = clone ? addressBytes.clone() : addressBytes;
-        maskBits0(bytes, netmaskBits);
-        String name = Inet.toOptimalString(bytes);
-        try {
-            return new CidrAddress(InetAddress.getByAddress(name, bytes), netmaskBits);
-        } catch (UnknownHostException e) {
-            throw Assert.unreachableCode();
-        }
+        return new CidrAddress(io.smallrye.common.net.CidrAddress.create(addressBytes, netmaskBits));
     }
 
     /**
@@ -144,16 +86,11 @@ public final class CidrAddress implements Serializable, Comparable<CidrAddress> 
      *
      * @param address the address to test
      * @return {@code true} if the address matches, {@code false} otherwise
+     * @deprecated Use {@link io.smallrye.common.net.CidrAddress#matches(InetAddress)} instead.
      */
+    @Deprecated(forRemoval = true)
     public boolean matches(InetAddress address) {
-        Assert.checkNotNullParam("address", address);
-        if (address instanceof Inet4Address) {
-            return matches((Inet4Address) address);
-        } else if (address instanceof Inet6Address) {
-            return matches((Inet6Address) address);
-        } else {
-            throw Assert.unreachableCode();
-        }
+        return cidrAddress.matches(address);
     }
 
     /**
@@ -161,9 +98,11 @@ public final class CidrAddress implements Serializable, Comparable<CidrAddress> 
      *
      * @param bytes the address bytes to test
      * @return {@code true} if the address bytes match, {@code false} otherwise
+     * @deprecated Use {@link io.smallrye.common.net.CidrAddress#matches(byte[])} instead.
      */
+    @Deprecated(forRemoval = true)
     public boolean matches(byte[] bytes) {
-        return matches(bytes, 0);
+        return cidrAddress.matches(bytes);
     }
 
     /**
@@ -172,10 +111,11 @@ public final class CidrAddress implements Serializable, Comparable<CidrAddress> 
      * @param bytes the address bytes to test
      * @param scopeId the scope ID, or 0 to match no scope
      * @return {@code true} if the address bytes match, {@code false} otherwise
+     * @deprecated Use {@link io.smallrye.common.net.CidrAddress#matches(byte[], int)} instead.
      */
+    @Deprecated(forRemoval = true)
     public boolean matches(byte[] bytes, int scopeId) {
-        Assert.checkNotNullParam("bytes", bytes);
-        return cachedBytes.length == bytes.length && (getScopeId() == 0 || getScopeId() == scopeId) && bitsMatch(cachedBytes, bytes, netmaskBits);
+        return cidrAddress.matches(bytes, scopeId);
     }
 
     /**
@@ -183,10 +123,11 @@ public final class CidrAddress implements Serializable, Comparable<CidrAddress> 
      *
      * @param address the address to test
      * @return {@code true} if the address matches, {@code false} otherwise
+     * @deprecated Use {@link io.smallrye.common.net.CidrAddress#matches(Inet4Address)} instead.
      */
+    @Deprecated(forRemoval = true)
     public boolean matches(Inet4Address address) {
-        Assert.checkNotNullParam("address", address);
-        return networkAddress instanceof Inet4Address && bitsMatch(cachedBytes, address.getAddress(), netmaskBits);
+        return cidrAddress.matches(address);
     }
 
     /**
@@ -194,11 +135,11 @@ public final class CidrAddress implements Serializable, Comparable<CidrAddress> 
      *
      * @param address the address to test
      * @return {@code true} if the address matches, {@code false} otherwise
+     * @deprecated Use {@link io.smallrye.common.net.CidrAddress#matches(Inet6Address)} instead.
      */
+    @Deprecated(forRemoval = true)
     public boolean matches(Inet6Address address) {
-        Assert.checkNotNullParam("address", address);
-        return networkAddress instanceof Inet6Address && bitsMatch(cachedBytes, address.getAddress(), netmaskBits)
-            && (getScopeId() == 0 || getScopeId() == address.getScopeId());
+        return cidrAddress.matches(address);
     }
 
     /**
@@ -207,11 +148,11 @@ public final class CidrAddress implements Serializable, Comparable<CidrAddress> 
      *
      * @param address the address to test
      * @return {@code true} if the given block is enclosed by this one, {@code false} otherwise
+     * @deprecated Use {@link io.smallrye.common.net.CidrAddress#matches(io.smallrye.common.net.CidrAddress)} instead.
      */
+    @Deprecated(forRemoval = true)
     public boolean matches(CidrAddress address) {
-        Assert.checkNotNullParam("address", address);
-        return netmaskBits <= address.netmaskBits && matches(address.cachedBytes)
-            && (getScopeId() == 0 || getScopeId() == address.getScopeId());
+        return cidrAddress.matches(address.cidrAddress);
     }
 
     /**
@@ -219,9 +160,11 @@ public final class CidrAddress implements Serializable, Comparable<CidrAddress> 
      * representation of the network of this CIDR address.
      *
      * @return the network address (not {@code null})
+     * @deprecated Use {@link io.smallrye.common.net.CidrAddress#getNetworkAddress()} instead.
      */
+    @Deprecated(forRemoval = true)
     public InetAddress getNetworkAddress() {
-        return networkAddress;
+        return cidrAddress.getNetworkAddress();
     }
 
     /**
@@ -229,90 +172,41 @@ public final class CidrAddress implements Serializable, Comparable<CidrAddress> 
      * or it is too small) then {@code null} is returned.
      *
      * @return the broadcast address for this CIDR block, or {@code null} if there is none
+     * @deprecated Use {@link io.smallrye.common.net.CidrAddress#getBroadcastAddress()} instead.
      */
+    @Deprecated(forRemoval = true)
     public Inet4Address getBroadcastAddress() {
-        final Inet4Address broadcast = this.broadcast;
-        if (broadcast == null) {
-            final int netmaskBits = this.netmaskBits;
-            if (netmaskBits >= 31) {
-                // definitely IPv6 or too small
-                return null;
-            }
-            // still maybe IPv6
-            final byte[] cachedBytes = this.cachedBytes;
-            if (cachedBytes.length == 4) {
-                // calculate
-                if (netmaskBits == 0) {
-                    return this.broadcast = Inet.INET4_BROADCAST;
-                } else {
-                    final byte[] bytes = maskBits1(cachedBytes.clone(), netmaskBits);
-                    try {
-                        return this.broadcast = (Inet4Address) InetAddress.getByAddress(Inet.toOptimalString(bytes), bytes);
-                    } catch (UnknownHostException e) {
-                        throw Assert.unreachableCode();
-                    }
-                }
-            }
-            return null;
-        }
-        return broadcast;
+        return cidrAddress.getBroadcastAddress();
     }
 
     /**
      * Get the netmask bits.  This will be in the range 0-32 for IPv4 addresses, and 0-128 for IPv6 addresses.
      *
      * @return the netmask bits
+     * @deprecated Use {@link io.smallrye.common.net.CidrAddress#getNetmaskBits()} instead.
      */
+    @Deprecated(forRemoval = true)
     public int getNetmaskBits() {
-        return netmaskBits;
+        return cidrAddress.getNetmaskBits();
     }
 
     /**
      * Get the match address scope ID (if it is an IPv6 address).
      *
      * @return the scope ID, or 0 if there is none or the address is an IPv4 address
+     * @deprecated Use {@link io.smallrye.common.net.CidrAddress#getScopeId()} instead.
      */
+    @Deprecated(forRemoval = true)
     public int getScopeId() {
-        return Inet.getScopeId(getNetworkAddress());
+        return cidrAddress.getScopeId();
     }
 
     public int compareTo(final CidrAddress other) {
-        Assert.checkNotNullParam("other", other);
-        if (this == other) return 0;
-        return compareAddressBytesTo(other.cachedBytes, other.netmaskBits, other.getScopeId());
+        return cidrAddress.compareTo(other.cidrAddress);
     }
 
     public int compareAddressBytesTo(final byte[] otherBytes, final int otherNetmaskBits, final int scopeId) {
-        Assert.checkNotNullParam("bytes", otherBytes);
-        final int otherLength = otherBytes.length;
-        if (otherLength != 4 && otherLength != 16) {
-            throw CommonMessages.msg.invalidAddressBytes(otherLength);
-        }
-        // IPv4 before IPv6
-        final byte[] cachedBytes = this.cachedBytes;
-        int res = signum(cachedBytes.length - otherLength);
-        if (res != 0) return res;
-        res = signum(scopeId - getScopeId());
-        if (res != 0) return res;
-        // sorted numerically with long matches coming later
-        final int netmaskBits = this.netmaskBits;
-        int commonPrefix = min(netmaskBits, otherNetmaskBits);
-        // compare byte-wise as far as we can
-        int i = 0;
-        while (commonPrefix >= 8) {
-            res = signum((cachedBytes[i] & 0xff) - (otherBytes[i] & 0xff));
-            if (res != 0) return res;
-            i++;
-            commonPrefix -= 8;
-        }
-        while (commonPrefix > 0) {
-            final int bit = 1 << commonPrefix;
-            res = signum((cachedBytes[i] & bit) - (otherBytes[i] & bit));
-            if (res != 0) return res;
-            commonPrefix--;
-        }
-        // common prefix is a match; now the shortest mask wins
-        return signum(netmaskBits - otherNetmaskBits);
+        return cidrAddress.compareAddressBytesTo(otherBytes, otherNetmaskBits, scopeId);
     }
 
     public boolean equals(final Object obj) {
@@ -320,36 +214,19 @@ public final class CidrAddress implements Serializable, Comparable<CidrAddress> 
     }
 
     public boolean equals(final CidrAddress obj) {
-        return obj == this || obj != null && netmaskBits == obj.netmaskBits && Arrays.equals(cachedBytes, obj.cachedBytes);
+        return obj == this || obj != null && cidrAddress.equals(obj.cidrAddress);
     }
 
     public int hashCode() {
-        int hashCode = this.hashCode;
-        if (hashCode == 0) {
-            hashCode = HashMath.multiHashOrdered(netmaskBits, Arrays.hashCode(cachedBytes));
-            if (hashCode == 0) {
-                hashCode = 1;
-            }
-            this.hashCode = hashCode;
-        }
-        return hashCode;
+        return cidrAddress.hashCode();
     }
 
     public String toString() {
-        final String toString = this.toString;
-        if (toString == null) {
-            final int scopeId = getScopeId();
-            if (scopeId == 0) {
-                return this.toString = String.format("%s/%d", Inet.toOptimalString(cachedBytes), Integer.valueOf(netmaskBits));
-            } else {
-                return this.toString = String.format("%s%%%d/%d", Inet.toOptimalString(cachedBytes), Integer.valueOf(scopeId), Integer.valueOf(netmaskBits));
-            }
-        }
-        return toString;
+        return cidrAddress.toString();
     }
 
     Object writeReplace() {
-        return new Ser(cachedBytes, netmaskBits);
+        return new Ser(cidrAddress.getNetworkAddress().getAddress(), getNetmaskBits());
     }
 
     static final class Ser implements Serializable {
@@ -364,68 +241,7 @@ public final class CidrAddress implements Serializable, Comparable<CidrAddress> 
         }
 
         Object readResolve() {
-            return create(b, m, false);
+            return create(b, m);
         }
-    }
-
-
-    private static boolean bitsMatch(byte[] address, byte[] test, int bits) {
-        final int length = address.length;
-        assert length == test.length;
-        // bytes are in big-endian form.
-        int i = 0;
-        while (bits >= 8 && i < length) {
-            if (address[i] != test[i]) {
-                return false;
-            }
-            i ++;
-            bits -= 8;
-        }
-        if (bits > 0) {
-            assert bits < 8;
-            int mask = 0xff << 8 - bits;
-            if ((address[i] & 0xff & mask) != (test[i] & 0xff & mask)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static byte[] maskBits0(byte[] address, int bits) {
-        final int length = address.length;
-        // bytes are in big-endian form.
-        int i = 0;
-        while (bits >= 8 && i < length) {
-            i ++;
-            bits -= 8;
-        }
-        if (bits > 0) {
-            assert bits < 8;
-            int mask = 0xff << 8 - bits;
-            address[i++] &= mask;
-        }
-        while (i < length) {
-            address[i++] = 0;
-        }
-        return address;
-    }
-
-    private static byte[] maskBits1(byte[] address, int bits) {
-        final int length = address.length;
-        // bytes are in big-endian form.
-        int i = 0;
-        while (bits >= 8 && i < length) {
-            i ++;
-            bits -= 8;
-        }
-        if (bits > 0) {
-            assert bits < 8;
-            int mask = 0xff >>> 8 - bits;
-            address[i++] |= mask;
-        }
-        while (i < length) {
-            address[i++] = (byte) 0xff;
-        }
-        return address;
     }
 }
