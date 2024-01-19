@@ -18,9 +18,17 @@
 
 package org.wildfly.common.os;
 
+/**
+ * @deprecated Use {@link ProcessBuilder.Redirect#DISCARD} directly.
+ */
+@Deprecated(forRemoval = true)
 public final class ProcessRedirect {
     private ProcessRedirect() {}
 
+    /**
+     * @deprecated Use {@link ProcessBuilder.Redirect#DISCARD} directly.
+     */
+    @Deprecated(forRemoval = true)
     public static ProcessBuilder.Redirect discard() {
         return ProcessBuilder.Redirect.DISCARD;
     }

@@ -28,7 +28,10 @@ import org.wildfly.common.Assert;
 
 /**
  * A set of utility methods for reference types.
+ *
+ * @deprecated Use {@link io.smallrye.common.ref.References} instead.
  */
+@Deprecated(forRemoval = true)
 public final class References {
     private References() {
     }

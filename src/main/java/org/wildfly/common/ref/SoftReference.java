@@ -30,6 +30,8 @@ import java.lang.ref.ReferenceQueue;
  * @see java.lang.ref.SoftReference
  *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
+ *
+ * @deprecated Use {@link io.smallrye.common.ref.SoftReference} instead.
  */
 public class SoftReference<T, A> extends java.lang.ref.SoftReference<T> implements Reference<T, A>, Reapable<T, A> {
     private final A attachment;

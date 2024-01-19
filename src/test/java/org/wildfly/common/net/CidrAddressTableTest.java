@@ -22,6 +22,8 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+// Keeping these tests just to make sure the object mapping works as expected.
+@SuppressWarnings("deprecation")
 public class CidrAddressTableTest {
     @Test
     public void testEmpty() {

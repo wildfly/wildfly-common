@@ -24,7 +24,9 @@ import java.util.EnumSet;
  * The type of cache.
  *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
+ * @deprecated Use {@link io.smallrye.common.cpu.CacheType} instead.
  */
+@Deprecated(forRemoval = true)
 public enum CacheType {
     /**
      * Unknown cache type.
@@ -51,6 +53,15 @@ public enum CacheType {
     CacheType(final boolean instruction, final boolean data) {
         this.instruction = instruction;
         this.data = data;
+    }
+
+    static CacheType of(final io.smallrye.common.cpu.CacheType cacheType) {
+        switch (cacheType) {
+            case DATA: return DATA;
+            case INSTRUCTION: return INSTRUCTION;
+            case UNIFIED: return UNIFIED;
+            default: return UNKNOWN;
+        }
     }
 
     /**

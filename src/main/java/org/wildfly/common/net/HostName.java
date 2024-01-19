@@ -18,71 +18,47 @@
 
 package org.wildfly.common.net;
 
-import static java.security.AccessController.doPrivileged;
-
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
-import org.wildfly.common.Assert;
-
 /**
  * Methods for getting the system host name.  The host name is detected from the environment, but may be overridden by
  * use of the {@code jboss.host.name} and/or {@code jboss.qualified.host.name} system properties.
  *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
+ * @deprecated Use {@link io.smallrye.common.net.HostName} instead.
  */
+@Deprecated(forRemoval = true)
 public final class HostName {
-
-    private static final Object lock = new Object();
-    private static volatile String hostName;
-    private static volatile String qualifiedHostName;
-    private static volatile String nodeName;
-
-    static {
-        String[] names = doPrivileged(new GetHostInfoAction());
-        hostName = names[0];
-        qualifiedHostName = names[1];
-        nodeName = names[2];
-    }
-
-    private HostName() {
-    }
-
-    static InetAddress getLocalHost() throws UnknownHostException {
-        InetAddress addr;
-        try {
-            addr = InetAddress.getLocalHost();
-        } catch (ArrayIndexOutOfBoundsException e) {  //this is workaround for mac osx bug see AS7-3223 and JGRP-1404
-            addr = InetAddress.getByName(null);
-        }
-        return addr;
-    }
 
     /**
      * Get the detected host name.
      *
      * @return the detected host name
+     * @deprecated Use {@link io.smallrye.common.net.HostName#getHostName()} instead.
      */
+    @Deprecated(forRemoval = true)
     public static String getHostName() {
-        return hostName;
+        return io.smallrye.common.net.HostName.getHostName();
     }
 
     /**
      * Get the detected qualified host name.
      *
      * @return the detected qualified host name
+     * @deprecated Use {@link io.smallrye.common.net.HostName#getQualifiedHostName()} instead.
      */
+    @Deprecated(forRemoval = true)
     public static String getQualifiedHostName() {
-        return qualifiedHostName;
+        return io.smallrye.common.net.HostName.getQualifiedHostName();
     }
 
     /**
      * Get the node name.
      *
      * @return the node name
+     * @deprecated Use {@link io.smallrye.common.net.HostName#getNodeName()} instead.
      */
+    @Deprecated(forRemoval = true)
     public static String getNodeName() {
-        return nodeName;
+        return io.smallrye.common.net.HostName.getNodeName();
     }
 
     /**
@@ -90,24 +66,21 @@ public final class HostName {
      * is then re-derived from that value.  The node name is not changed by this method.
      *
      * @param qualifiedHostName the host name
+     * @deprecated Use {@link io.smallrye.common.net.HostName#setQualifiedHostName(String)} instead.
      */
+    @Deprecated(forRemoval = true)
     public static void setQualifiedHostName(final String qualifiedHostName) {
-        Assert.checkNotNullParam("qualifiedHostName", qualifiedHostName);
-        synchronized (lock) {
-            HostName.qualifiedHostName = qualifiedHostName;
-            // Use the host part of the qualified host name
-            final int idx = qualifiedHostName.indexOf('.');
-            HostName.hostName = idx == -1 ? qualifiedHostName : qualifiedHostName.substring(0, idx);
-        }
+        io.smallrye.common.net.HostName.setQualifiedHostName(qualifiedHostName);
     }
 
     /**
      * Set the node name.
      *
      * @param nodeName the node name
+     * @deprecated Use {@link io.smallrye.common.net.HostName#setNodeName(String)} instead.
      */
+    @Deprecated(forRemoval = true)
     public static void setNodeName(final String nodeName) {
-        Assert.checkNotNullParam("nodeName", nodeName);
-        HostName.nodeName = nodeName;
+        io.smallrye.common.net.HostName.setNodeName(nodeName);
     }
 }

@@ -18,23 +18,14 @@
 
 package org.wildfly.common.os;
 
-import static java.security.AccessController.doPrivileged;
-
 /**
  * Utilities for getting information about the current process.
  *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
+ * @deprecated Use {@link io.smallrye.common.os.Process} instead.
  */
+@Deprecated(forRemoval = true)
 public final class Process {
-    private static final long processId;
-    private static final String processName;
-
-    static {
-        Object[] array = doPrivileged(new GetProcessInfoAction());
-        processId = ((Long) array[0]).longValue();
-        processName = (String) array[1];
-    }
-
     private Process() {
     }
 
@@ -42,9 +33,11 @@ public final class Process {
      * Get the name of this process.  If the process name is not known, then "&lt;unknown&gt;" is returned.
      *
      * @return the process name (not {@code null})
+     * @deprecated Use {@link io.smallrye.common.os.Process#getProcessName} instead.
      */
+    @Deprecated(forRemoval = true)
     public static String getProcessName() {
-        return processName;
+        return io.smallrye.common.os.Process.getProcessName();
     }
 
     /**
@@ -52,8 +45,10 @@ public final class Process {
      * -1 is returned.
      *
      * @return the ID of this process, or -1 if it cannot be determined
+     * @deprecated Use {@link io.smallrye.common.os.Process#getProcessId} instead.
      */
+    @Deprecated(forRemoval = true)
     public static long getProcessId() {
-        return processId;
+        return io.smallrye.common.os.Process.getProcessId();
     }
 }

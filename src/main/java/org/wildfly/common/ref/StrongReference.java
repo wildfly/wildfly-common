@@ -25,7 +25,10 @@ package org.wildfly.common.ref;
  * @param <A> the attachment type
  *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
+ *
+ * @deprecated Use {@link io.smallrye.common.ref.StrongReference} instead.
  */
+@Deprecated(forRemoval = true)
 public class StrongReference<T, A> implements Reference<T, A> {
 
     private volatile T referent;

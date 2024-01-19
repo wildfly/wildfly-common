@@ -29,7 +29,10 @@ import java.util.EnumSet;
  * @see java.lang.ref.Reference
  *
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
+ *
+ * @deprecated Use {@link io.smallrye.common.ref.Reference} instead.
  */
+@Deprecated(forRemoval = true)
 public interface Reference<T, A> {
 
     /**
