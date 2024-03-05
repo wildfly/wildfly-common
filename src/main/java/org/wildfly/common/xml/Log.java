@@ -18,6 +18,7 @@
 
 package org.wildfly.common.xml;
 
+import static java.lang.invoke.MethodHandles.lookup;
 import static org.jboss.logging.Logger.Level.WARN;
 
 import org.jboss.logging.BasicLogger;
@@ -30,7 +31,7 @@ import org.jboss.logging.annotations.MessageLogger;
 @MessageLogger(projectCode = "COM", length = 5)
 interface Log extends BasicLogger {
 
-    Log XML_FACTORY_LOGGER = Logger.getMessageLogger(Log.class, "org.wildfly.common.xml");
+    Log XML_FACTORY_LOGGER = Logger.getMessageLogger(lookup(), Log.class, "org.wildfly.common.xml");
 
     // 3100-3199 reserved for xml factory logging
     @LogMessage(level = WARN)
