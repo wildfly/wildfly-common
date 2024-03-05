@@ -18,6 +18,8 @@
 
 package org.wildfly.common.ref;
 
+import static java.lang.invoke.MethodHandles.lookup;
+
 import org.jboss.logging.Logger;
 import org.jboss.logging.annotations.Cause;
 import org.jboss.logging.annotations.LogMessage;
@@ -29,7 +31,7 @@ import org.jboss.logging.annotations.MessageLogger;
  */
 @MessageLogger(projectCode = "COM", length = 5)
 interface Log {
-    Log log = Logger.getMessageLogger(Log.class, "org.wildfly.common.ref");
+    Log log = Logger.getMessageLogger(lookup(), Log.class, "org.wildfly.common.ref");
 
     // 3000-3099 reserved for reference queue logging
 
