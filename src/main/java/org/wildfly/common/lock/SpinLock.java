@@ -18,15 +18,17 @@
 
 package org.wildfly.common.lock;
 
-import static org.wildfly.common.lock.JDKSpecific.unsafe;
+import static java.lang.invoke.MethodHandles.*;
 
+import java.lang.invoke.ConstantBootstraps;
+import java.lang.invoke.VarHandle;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 
+import io.smallrye.common.cpu.ProcessorInfo;
 import org.wildfly.common.Assert;
-import org.wildfly.common.cpu.ProcessorInfo;
 
 /**
  * A spin lock.  Such locks are designed to only be held for a <em>very</em> short time - for example, long enough to compare and
@@ -36,15 +38,11 @@ import org.wildfly.common.cpu.ProcessorInfo;
  * {@code tryLock}, and {@code unlock} methods should be used to control the lock.
  */
 public class SpinLock implements ExtendedLock {
-    private static final long ownerOffset;
+    private final VarHandle ownerHandle = ConstantBootstraps.fieldVarHandle(lookup(), "owner", VarHandle.class, SpinLock.class, Thread.class);
+
     private static final int defaultSpinLimit;
 
     static {
-        try {
-            ownerOffset = unsafe.objectFieldOffset(SpinLock.class.getDeclaredField("owner"));
-        } catch (NoSuchFieldException e) {
-            throw new NoSuchFieldError(e.getMessage());
-        }
         defaultSpinLimit = AccessController.doPrivileged(
             (PrivilegedAction<Integer>) () -> Integer.valueOf(
                 System.getProperty("jboss.spin-lock.limit", ProcessorInfo.availableProcessors() == 1 ? "0" : "5000")
@@ -114,13 +112,13 @@ public class SpinLock implements ExtendedLock {
             if (owner == Thread.currentThread()) {
                 level++;
                 return;
-            } else if (owner == null && unsafe.compareAndSwapObject(this, ownerOffset, null, Thread.currentThread())) {
+            } else if (owner == null && trySetOwner()) {
                 level = 1;
                 return;
             } else if (spins >= spinLimit) {
                 Thread.yield();
             } else {
-                JDKSpecific.onSpinWait();
+                Thread.onSpinWait();
                 spins++;
             }
         }
@@ -140,13 +138,13 @@ public class SpinLock implements ExtendedLock {
             if (owner == Thread.currentThread()) {
                 level++;
                 return;
-            } else if (owner == null && unsafe.compareAndSwapObject(this, ownerOffset, null, Thread.currentThread())) {
+            } else if (owner == null && trySetOwner()) {
                 level = 1;
                 return;
             } else if (spins >= spinLimit) {
                 Thread.yield();
             } else {
-                JDKSpecific.onSpinWait();
+                Thread.onSpinWait();
                 spins++;
             }
         }
@@ -162,7 +160,7 @@ public class SpinLock implements ExtendedLock {
         if (owner == Thread.currentThread()) {
             level++;
             return true;
-        } else if (owner == null && unsafe.compareAndSwapObject(this, ownerOffset, null, Thread.currentThread())) {
+        } else if (owner == null && trySetOwner()) {
             level = 1;
             return true;
         } else {
@@ -204,5 +202,9 @@ public class SpinLock implements ExtendedLock {
      */
     public Condition newCondition() throws UnsupportedOperationException {
         throw Assert.unsupported();
+    }
+
+    private boolean trySetOwner() {
+        return (boolean) ownerHandle.compareAndSet(this, (Thread) null, Thread.currentThread());
     }
 }
