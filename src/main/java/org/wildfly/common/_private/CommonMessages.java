@@ -18,6 +18,8 @@
 
 package org.wildfly.common._private;
 
+import static java.lang.invoke.MethodHandles.lookup;
+
 import java.io.IOException;
 import java.security.Permission;
 import java.security.PrivilegedActionException;
@@ -33,7 +35,7 @@ import org.wildfly.common.codec.DecodeException;
  */
 @MessageBundle(projectCode = "COM", length = 5)
 public interface CommonMessages {
-    CommonMessages msg = Messages.getBundle(CommonMessages.class);
+    CommonMessages msg = Messages.getBundle(lookup(), CommonMessages.class);
 
     // simple validation
 
