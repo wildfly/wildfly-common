@@ -47,7 +47,7 @@ public interface CommonMessages {
 
     IllegalArgumentException paramLessThan(String name, double min);
 
-    @Message(id = 2, value = "Parameter '%s' must not be greater than than %d")
+    @Message(id = 2, value = "Parameter '%s' must not be greater than %d")
     IllegalArgumentException paramGreaterThan(String name, long max);
 
     IllegalArgumentException paramGreaterThan(String name, double max);
