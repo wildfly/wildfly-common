@@ -517,7 +517,7 @@ public final class Assert {
      */
     @SuppressWarnings("ConstantConditions")
     public static boolean assertTrue(boolean expr) {
-        assert expr : CommonMessages.msg.expectedBoolean(expr);
+        assert expr : CommonMessages.msg.expectedBoolean(true);
         return expr;
     }
 
@@ -529,7 +529,7 @@ public final class Assert {
      */
     @SuppressWarnings("ConstantConditions")
     public static boolean assertFalse(boolean expr) {
-        assert ! expr : CommonMessages.msg.expectedBoolean(expr);
+        assert ! expr : CommonMessages.msg.expectedBoolean(false);
         return expr;
     }
 
