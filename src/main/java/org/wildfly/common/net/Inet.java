@@ -542,7 +542,8 @@ public final class Inet {
      */
     @Deprecated(forRemoval = true)
     public static CidrAddress parseCidrAddress(String address) {
-        return new CidrAddress(io.smallrye.common.net.Inet.parseCidrAddress(address));
+        io.smallrye.common.net.CidrAddress cidrAddress = io.smallrye.common.net.Inet.parseCidrAddress(address);
+        return cidrAddress == null ? null : new CidrAddress(cidrAddress);
     }
 
     /**
