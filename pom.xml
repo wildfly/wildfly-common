@@ -144,6 +144,7 @@
                     <footer><![CDATA[WildFly Common ]]>${project.version}</footer>
                     <bottom><![CDATA[<i>Copyright &#169; 2018 JBoss, a division of Red Hat, Inc.</i>]]></bottom>
                     <doclint>none</doclint>
+                    <legacyMode>true</legacyMode>
                 </configuration>
             </plugin>
             <plugin>
