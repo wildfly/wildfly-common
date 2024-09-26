@@ -13,4 +13,6 @@ mvn verify
 
 == Issue tracker
 
-https://issues.redhat.com/projects/WFCOM/summary
+https://github.com/wildfly/wildfly-common/issues
+
+(and https://issues.redhat.com/projects/WFCOM/summary for releases older than `2.0.0.Final`)

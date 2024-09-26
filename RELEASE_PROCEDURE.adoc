@@ -1,0 +1,34 @@
+# Release Procedure
+
+WildFly Common is released in JBoss Nexus Repository
+
+To release a new version, follow the instructions:
+
+```
+git checkout --detach
+
+mvn versions:set -DnewVersion=<release version>
+git commit -am 'Prep <release version>'
+git tag -a -m <release version> <release version>
+mvn clean install && mvn deploy -Pjboss-release -DaltDeploymentRepository=jboss-releases-repository::https://repository.jboss.org/nexus/service/local/staging/deploy/maven2
+```
+
+If the deployment to Nexus is successful, you can continue with:
+
+```
+git checkout main (or the release branch)
+mvn versions:set -DnewVersion=<next version>-SNAPSHOT
+git commit -am 'Next is <next version>'
+git push upstream <tag> <branch> --dry-run
+```
+
+At this point, release the artifacts in Nexus.
+
+Finally, push the commits to GitHub:
+
+```
+git push upstream <tag> <branch>
+```
+
+Once the artifacts are in Nexus and the tag is pushed to GitHub, the last step is to create the Release Notes in https://github.com/wildfly/wildfly-common/releases[GitHub Releases] from the new tag.
+
