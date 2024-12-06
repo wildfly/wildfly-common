@@ -22,7 +22,6 @@ jobs:
         distribution: 'temurin'
         cache: maven
         java-version: |
-          11
           17
           21
           23
@@ -30,4 +29,4 @@ jobs:
     - name: Build & Test with Maven
       run: |
         cd wildfly-common
-        mvn -B -ntp -N install --file pom.xml -Djava11.home="${{env.JAVA_HOME_11_X64}}" -Djava17.home="${{env.JAVA_HOME_17_X64}}" -Djava21.home="${{env.JAVA_HOME_21_X64}}"
+        mvn -B -ntp -N install --file pom.xml -Djava17.home="${{env.JAVA_HOME_17_X64}}" -Djava21.home="${{env.JAVA_HOME_21_X64}}"
