@@ -98,10 +98,6 @@
             <artifactId>smallrye-common-os</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.smallrye.common</groupId>
-            <artifactId>smallrye-common-ref</artifactId>
-        </dependency>
-        <dependency>
             <!-- This dependency is just for javadoc -->
             <groupId>javax.annotation</groupId>
             <artifactId>javax.annotation-api</artifactId>
