@@ -8,7 +8,6 @@ module org.wildfly.common {
     requires io.smallrye.common.expression;
     requires io.smallrye.common.net;
     requires io.smallrye.common.os;
-    requires io.smallrye.common.ref;
 
     requires org.jboss.logging;
 
